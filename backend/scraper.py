@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import html
+import datetime
 import json
 
 ROOT = 'https://collegearts.yale.edu'
@@ -22,22 +24,24 @@ def download_productions_page(number):
     return response.json()[2]['data']
 
 def download_production_page(path):
+    print('------------------' + production_url)
     html = requests.get(ROOT + production_url).text
     return html
 
 def scrape_people_list(table):
     relationships = []
-    people = set()
+    people = []
     relationship_type = table.find('h2').text.strip()
     rows = table.find_all('div', {'class': 'field-collection-view'})
+    print(rows)
     for row in rows:
         link = row.find('a')
         person_id = link['href'].replace('/biography/', '')
         relationships.append({
-            'title': row.find('div', {'class': 'field-name-field-character'}).text.strip(),
+            'role': row.find('div', {'class': 'field-name-field-character'}).text.strip(),
             'person_id': person_id,
         })
-        people.add({
+        people.append({
             'id': person_id,
             'name': link.text.strip(),
         })
@@ -73,19 +77,22 @@ for production_url in production_urls:
     soup = soup.find('div', {'id': 'zone-content'})
     production['title'] = soup.find('h1').text.strip()
     date_section = soup.find('div', {'class': 'group-performance-date-'})
-    date_section_rows = date_section.findChildren()
+    date_section_rows = date_section.findChildren(recursive=False)
     parse_mode = None
     dates = []
     for row in date_section_rows:
+        if row.name not in ('h2', 'p'):
+            continue
+        text = html.unescape(row.text.strip())
         if row.name == 'h2':
-            parse_mode = row.text.strip()
+            parse_mode = text
         elif parse_mode == 'Performance Dates & Times':
             # Note: we are throwing out time data here.
             # We probably don't need it but we could get it if we want.
-            dt = datetime.datetime.strptime(row.text.strip(), '%B %e, %Y - %l%P')
-            dates.append(dt.strftime('%Y-%m-%d')))
-        elif parse_mode == 'Location':
-            production['location'] = row.text.strip()
+            dt = datetime.datetime.strptime(text.split(' - ')[0], '%B %d, %Y')
+            dates.append(dt.strftime('%Y-%m-%d'))
+    location = date_section.find('div', {'class': 'group-location'}).find('div', {'class': 'field-item'}).text.strip()
+    production['location'] = location
     production['open_date'] = dates[0]
     production['close_date'] = dates[-1]
 
@@ -104,6 +111,8 @@ for production_url in production_urls:
     for person in performance_people:
         if person['id'] not in people:
             people[person['id']] = person
+            people[person['id']]['productions'] = []
+        people[person['id']]['productions'].append(production['id'])
 
     productions[production['id']] = production
 
