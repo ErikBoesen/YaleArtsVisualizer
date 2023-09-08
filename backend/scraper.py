@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def download_page(number):
+
+def download_productions_page(number):
     """
     Download the HTML content of the page with the given number.
     :param number: Number of page to download. Note that this is zero-indexed.
@@ -17,13 +18,26 @@ def download_page(number):
     }
 
     response = requests.post('https://collegearts.yale.edu/views/ajax', cookies=cookies, headers=headers, data=data)
-    print(response.json()[2]['data'])
+    return response.json()[2]['data']
+
+def download_production_page(path):
+    html = requests.get(production_url).text
 
 
 page_number = 0
+production_urls = []
 while True:  # TODO: clean this up
-    page_html = download_page(page_number)
+    page_html = download_productions_page(page_number)
     soup = BeautifulSoup(page_html, 'html.parser')
     production_rows = soup.find_all('div', {'class': 'views-row'})
-    print(production_rows)
+    production_urls_page = [row.find('a')['href'] for row in production_rows]
+    if len(production_urls_page) == 0:
+        print(f'Found 0 productions on page {page_number}; terminating loop.')
+        break
+    production_urls += production_urls_page
+    print(f'Scraped page {page_number} and located {len(production_urls_page)} productions (total {len(production_urls)}).')
     page_number += 1
+
+for production_urls in production_urls:
+
+
