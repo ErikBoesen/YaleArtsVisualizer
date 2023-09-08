@@ -60,8 +60,8 @@ page_number = 0
 production_urls = []
 while True:  # TODO: clean this up
     # TEMPORARY early exit
-    if page_number == 1:
-        break
+    #if page_number == 1:
+    #    break
 
     page_html = download_productions_page(page_number)
     soup = BeautifulSoup(page_html, 'html.parser')
@@ -104,8 +104,9 @@ for production_url in production_urls:
                 # We probably don't need it but we could get it if we want.
                 dt = datetime.datetime.strptime(text.split(' - ')[0], '%B %d, %Y')
                 dates.append(dt.strftime('%Y-%m-%d'))
-        production['open_date'] = dates[0]
-        production['close_date'] = dates[-1]
+        if dates:
+            production['open_date'] = dates[0]
+            production['close_date'] = dates[-1]
 
     relationships = []
     performance_people = []
@@ -134,6 +135,6 @@ for production_url in production_urls:
     productions[production['id']] = production
 
 with open('productions.json', 'w') as f:
-    json.dump(productions, f, indent=4)
+    json.dump(productions, f)
 with open('people.json', 'w') as f:
-    json.dump(people, f, indent=4)
+    json.dump(people, f)
