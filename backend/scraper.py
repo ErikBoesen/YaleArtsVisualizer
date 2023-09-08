@@ -30,13 +30,20 @@ def download_production_page(path):
 def scrape_people_list(table):
     relationships = []
     people = []
-    relationship_type = table.find('h2').text.strip()
+    header = table.find('h2')
+    if not header:
+        return [], []
+    relationship_type = header.text.strip()
     rows = table.find_all('div', {'class': 'field-collection-view'})
     for row in rows:
         link = row.find('a')
+        if link is None:
+            print('No link found, skipping this person.')
+            continue
         person_id = link['href'].replace('/biography/', '')
         role_class = 'field-name-field-character' if relationship_type == 'Performers' else 'field-name-field-role'
-        role = row.find('div', {'class': role_class}).text.strip()
+        role_elem = row.find('div', {'class': role_class})
+        role = role_elem.text.strip() if role_elem else None
         relationships.append({
             'relationship_type': relationship_type,
             'role': role,
@@ -70,42 +77,49 @@ while True:  # TODO: clean this up
 productions = {}
 people = {}
 for production_url in production_urls:
+    production_id = production_url.replace('/events/shows-screenings/', '')
+    print('Parsing production ' + production_id)
     production = {
-        'id': production_url.replace('/events/shows-screenings/', ''),
+        'id': production_id,
     }
     page_html = download_production_page(production_url)
     soup = BeautifulSoup(page_html, 'html.parser')
     soup = soup.find('div', {'id': 'zone-content'})
     production['title'] = soup.find('h1').text.strip()
     date_section = soup.find('div', {'class': 'group-performance-date-'})
-    date_section_rows = date_section.findChildren(recursive=False)
-    parse_mode = None
-    dates = []
-    for row in date_section_rows:
-        if row.name not in ('h2', 'p'):
-            continue
-        text = html.unescape(row.text.strip())
-        if row.name == 'h2':
-            parse_mode = text
-        elif parse_mode == 'Performance Dates & Times':
-            # Note: we are throwing out time data here.
-            # We probably don't need it but we could get it if we want.
-            dt = datetime.datetime.strptime(text.split(' - ')[0], '%B %d, %Y')
-            dates.append(dt.strftime('%Y-%m-%d'))
-    location = date_section.find('div', {'class': 'group-location'}).find('div', {'class': 'field-item'}).text.strip()
-    production['location'] = location
-    production['open_date'] = dates[0]
-    production['close_date'] = dates[-1]
+    if date_section is None:
+        print('No date was found for this production.')
+    else:
+        date_section_rows = date_section.findChildren(recursive=False)
+        parse_mode = None
+        dates = []
+        for row in date_section_rows:
+            if row.name not in ('h2', 'p'):
+                continue
+            text = html.unescape(row.text.strip())
+            if row.name == 'h2':
+                parse_mode = text
+            elif parse_mode == 'Performance Dates & Times':
+                # Note: we are throwing out time data here.
+                # We probably don't need it but we could get it if we want.
+                dt = datetime.datetime.strptime(text.split(' - ')[0], '%B %d, %Y')
+                dates.append(dt.strftime('%Y-%m-%d'))
+        production['open_date'] = dates[0]
+        production['close_date'] = dates[-1]
 
     relationships = []
     performance_people = []
 
-    cast_relationships, cast_people = scrape_people_list(soup.find('div', {'class': 'group-cast-column'}))
-    relationships += cast_relationships
-    performance_people += cast_people
-    staff_relationships, staff_people = scrape_people_list(soup.find('div', {'class': 'group-staff-column'}))
-    relationships += staff_relationships
-    performance_people += staff_people
+    cast_table = soup.find('div', {'class': 'group-cast-column'})
+    if cast_table:
+        cast_relationships, cast_people = scrape_people_list(cast_table)
+        relationships += cast_relationships
+        performance_people += cast_people
+    staff_table = soup.find('div', {'class': 'group-staff-column'})
+    if staff_table:
+        staff_relationships, staff_people = scrape_people_list(staff_table)
+        relationships += staff_relationships
+        performance_people += staff_people
 
     production['relationships'] = relationships
 
