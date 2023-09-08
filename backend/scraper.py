@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import json
 
 ROOT = 'https://collegearts.yale.edu'
 
@@ -61,7 +62,7 @@ while True:  # TODO: clean this up
     print(f'Scraped page {page_number} and located {len(production_urls_page)} productions (total {len(production_urls)}).')
     page_number += 1
 
-productions = []
+productions = {}
 people = {}
 for production_url in production_urls:
     production = {
@@ -100,4 +101,13 @@ for production_url in production_urls:
 
     production['relationships'] = relationships
 
-    productions.append(production)
+    for person in performance_people:
+        if person['id'] not in people:
+            people[person['id']] = person
+
+    productions[production['id']] = production
+
+with open('productions.json', 'w') as f:
+    json.dump(productions, f, indent=4)
+with open('people.json', 'w') as f:
+    json.dump(people, f, indent=4)
