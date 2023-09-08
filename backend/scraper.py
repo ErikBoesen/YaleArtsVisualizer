@@ -24,6 +24,24 @@ def download_production_page(path):
     html = requests.get(ROOT + production_url).text
     return html
 
+def scrape_people_list(table):
+    relationships = []
+    people = set()
+    relationship_type = table.find('h2').text.strip()
+    rows = table.find_all('div', {'class': 'field-collection-view'})
+    for row in rows:
+        link = row.find('a')
+        person_id = link['href'].replace('/biography/', '')
+        relationships.append({
+            'title': row.find('div', {'class': 'field-name-field-character'}).text.strip(),
+            'person_id': person_id,
+        })
+        people.add({
+            'id': person_id,
+            'name': link.text.strip(),
+        })
+    return relationships, people
+
 
 page_number = 0
 production_urls = []
@@ -43,7 +61,8 @@ while True:  # TODO: clean this up
     print(f'Scraped page {page_number} and located {len(production_urls_page)} productions (total {len(production_urls)}).')
     page_number += 1
 
-productions = {}
+productions = []
+people = {}
 for production_url in production_urls:
     production = {
         'id': production_url.replace('/events/shows-screenings/', ''),
@@ -64,4 +83,21 @@ for production_url in production_urls:
             # We probably don't need it but we could get it if we want.
             dt = datetime.datetime.strptime(row.text.strip(), '%B %e, %Y - %l%P')
             dates.append(dt.strftime('%Y-%m-%d')))
+        elif parse_mode == 'Location':
+            production['location'] = row.text.strip()
+    production['open_date'] = dates[0]
+    production['close_date'] = dates[-1]
 
+    relationships = []
+    performance_people = []
+
+    cast_relationships, cast_people = scrape_people_list(soup.find('div', {'class': 'group-cast-column'}))
+    relationships += cast_relationships
+    performance_people += cast_people
+    staff_relationships, staff_people = scrape_people_list(soup.find('div', {'class': 'group-staff-column'}))
+    relationships += staff_relationships
+    performance_people += staff_people
+
+    production['relationships'] = relationships
+
+    productions.append(production)
