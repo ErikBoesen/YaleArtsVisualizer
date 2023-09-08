@@ -24,7 +24,6 @@ def download_productions_page(number):
     return response.json()[2]['data']
 
 def download_production_page(path):
-    print('------------------' + production_url)
     html = requests.get(ROOT + production_url).text
     return html
 
@@ -33,12 +32,14 @@ def scrape_people_list(table):
     people = []
     relationship_type = table.find('h2').text.strip()
     rows = table.find_all('div', {'class': 'field-collection-view'})
-    print(rows)
     for row in rows:
         link = row.find('a')
         person_id = link['href'].replace('/biography/', '')
+        role_class = 'field-name-field-character' if relationship_type == 'Performers' else 'field-name-field-role'
+        role = row.find('div', {'class': role_class}).text.strip()
         relationships.append({
-            'role': row.find('div', {'class': 'field-name-field-character'}).text.strip(),
+            'relationship_type': relationship_type,
+            'role': role,
             'person_id': person_id,
         })
         people.append({
@@ -112,7 +113,9 @@ for production_url in production_urls:
         if person['id'] not in people:
             people[person['id']] = person
             people[person['id']]['productions'] = []
-        people[person['id']]['productions'].append(production['id'])
+        # TODO: should probably use a set for this. But more annoying to turn into JSON later on :(
+        if production['id'] not in people[person['id']]['productions']:
+            people[person['id']]['productions'].append(production['id'])
 
     productions[production['id']] = production
 
