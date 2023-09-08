@@ -127,12 +127,50 @@ for production_url in production_urls:
     for person in performance_people:
         if person['id'] not in people:
             people[person['id']] = person
-            people[person['id']]['productions'] = []
+            people[person['id']]['in'] = []
         # TODO: should probably use a set for this. But more annoying to turn into JSON later on :(
-        if production['id'] not in people[person['id']]['productions']:
-            people[person['id']]['productions'].append(production['id'])
+        if production['id'] not in people[person['id']]['in']:
+            people[person['id']]['in'].append(production['id'])
 
     productions[production['id']] = production
+
+# Map all string IDs to a much shorter string so the output files are less huge
+base = 92
+start_point = 34
+def number_compress(number: int) -> str:
+    if number == 0:
+        return ''
+    digits = ''
+    while number:
+        digits += chr(number % base + start_point)
+        number //= base
+    return digits[::-1]
+
+production_id_map = {}
+for index, key in enumerate(productions.keys()):
+    production_id_map[key] = number_compress(index)
+person_id_map = {}
+for index, key in enumerate(people.keys()):
+    person_id_map[key] = number_compress(index)
+print(production_id_map)
+print(person_id_map)
+
+new_people = {}
+for person_id, person in people.items():
+    person['in'] = [production_id_map[production_id] for production_id in person['in']]
+    new_people[person_id_map[person_id]] = person
+people = new_people
+new_productions = {}
+for production_id, production in productions.items():
+    # NOTE: we are throwing out the person's role name and type to keep the output file small.
+    # This might be something we want to keep later.
+    relationships = production.pop('relationships')
+    production['in'] = [person_id_map[relationship['person_id']] for relationship in relationships]
+    # Skip productions with nobody in them
+    if not production['in']:
+        continue
+    new_productions[production_id_map[production_id]] = production
+productions = new_productions
 
 with open('productions.json', 'w') as f:
     json.dump(productions, f)
