@@ -165,7 +165,7 @@ for production_id, production in productions.items():
     # NOTE: we are throwing out the person's role name and type to keep the output file small.
     # This might be something we want to keep later.
     relationships = production.pop('relationships')
-    production['in'] = [person_id_map[relationship['person_id']] for relationship in relationships]
+    production['in'] = list(set([person_id_map[relationship['person_id']] for relationship in relationships]))
     # Skip productions with nobody in them
     if not production['in']:
         continue
