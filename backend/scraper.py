@@ -60,8 +60,8 @@ page_number = 0
 production_urls = []
 while True:  # TODO: clean this up
     # TEMPORARY early exit
-    #if page_number == 1:
-    #    break
+    if page_number == 1:
+        break
 
     page_html = download_productions_page(page_number)
     soup = BeautifulSoup(page_html, 'html.parser')
@@ -146,33 +146,46 @@ def number_compress(number: int) -> str:
         number //= base
     return digits[::-1]
 
-production_id_map = {}
-for index, key in enumerate(productions.keys()):
-    production_id_map[key] = number_compress(index)
-person_id_map = {}
-for index, key in enumerate(people.keys()):
-    person_id_map[key] = number_compress(index)
-print(production_id_map)
-print(person_id_map)
+id_map = {}
+for index, key in enumerate(list(productions.keys()) + list(people.keys())):
+    id_map[key] = number_compress(index)
 
 new_people = {}
 for person_id, person in people.items():
-    person['in'] = [production_id_map[production_id] for production_id in person['in']]
-    new_people[person_id_map[person_id]] = person
+    person['in'] = [id_map[production_id] for production_id in person['in']]
+    new_people[id_map[person_id]] = person
 people = new_people
 new_productions = {}
 for production_id, production in productions.items():
     # NOTE: we are throwing out the person's role name and type to keep the output file small.
     # This might be something we want to keep later.
     relationships = production.pop('relationships')
-    production['in'] = list(set([person_id_map[relationship['person_id']] for relationship in relationships]))
+    production['in'] = list(set([id_map[relationship['person_id']] for relationship in relationships]))
     # Skip productions with nobody in them
     if not production['in']:
         continue
-    new_productions[production_id_map[production_id]] = production
+    new_productions[id_map[production_id]] = production
 productions = new_productions
 
 with open('productions.json', 'w') as f:
     json.dump(productions, f)
 with open('people.json', 'w') as f:
     json.dump(people, f)
+
+nodes = []
+links = []
+for production_id, production in productions.items():
+    production['slug'] = production['id']
+    production['id'] = production_id
+    people_ids = production.pop('in')
+    nodes.append(production)
+    for person_id in people_ids:
+        links.append({'source': production_id, 'target': person_id})
+for person_id, person in people.items():
+    person['slug'] = person['id']
+    person['id'] = person_id
+    person.pop('in')
+    nodes.append(person)
+
+with open('graph.json', 'w') as f:
+    json.dump({'nodes': nodes, 'links': links}, f)
