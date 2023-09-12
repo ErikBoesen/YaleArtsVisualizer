@@ -60,8 +60,8 @@ page_number = 0
 production_urls = []
 while True:  # TODO: clean this up
     # TEMPORARY early exit
-    if page_number == 1:
-        break
+    #if page_number == 1:
+    #    break
 
     page_html = download_productions_page(page_number)
     soup = BeautifulSoup(page_html, 'html.parser')
