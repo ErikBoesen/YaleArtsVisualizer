@@ -1,0 +1,18 @@
+<html>
+    <head>
+        <title>Yale Arts Map</title>
+        <script src="//unpkg.com/3d-force-graph"></script>
+    </head>
+
+    <body>
+
+        <div id="graph"></div>
+
+        <script>
+            const element = document.getElementById('graph');
+
+            const Graph = ForceGraph3D()(element)
+                .jsonUrl('../backend/graph.json')
+        </script>
+    </body>
+</html>
