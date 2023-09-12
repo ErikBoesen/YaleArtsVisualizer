@@ -2,7 +2,8 @@ const element = document.getElementById('graph');
 
 const Graph = ForceGraph3D()(element)
     .jsonUrl('graph.json')
-    .nodeAutoColorBy('user')
+    .backgroundColor('#00356b')
+    .nodeColor(node => node.title ? 'green' : 'yellow')
     .nodeLabel(node => node.name || node.title)
     .onNodeClick(node => {
         if (node.title) {
