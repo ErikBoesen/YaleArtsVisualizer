@@ -167,10 +167,14 @@ for production_id, production in productions.items():
     new_productions[id_map[production_id]] = production
 productions = new_productions
 
+# TODO: we're doing a lot of things above to coerce the data into the format that we wanted for these files.
+# Since we don't really need these anymore, would be better to just put the data in the nodes/links format to begin with.
+"""
 with open('productions.json', 'w') as f:
     json.dump(productions, f)
 with open('people.json', 'w') as f:
     json.dump(people, f)
+"""
 
 nodes = []
 links = []
