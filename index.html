@@ -13,7 +13,7 @@
             const element = document.getElementById('graph');
 
             const Graph = ForceGraph3D()(element)
-                .jsonUrl('../backend/graph.json')
+                .jsonUrl('graph.json')
                 .nodeAutoColorBy('user')
                 .nodeLabel(node => node.name || node.title)
                 .onNodeClick(node => {
