@@ -17,3 +17,10 @@ h1 {
     color: white;
     margin: 0;
 }
+.node-label {
+    font-size: 12px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background-color: rgba(0,53,107,0.2);
+    user-select: none;
+}
