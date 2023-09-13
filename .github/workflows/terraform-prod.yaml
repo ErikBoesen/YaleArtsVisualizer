@@ -1,0 +1,167 @@
+name: "Production Deploy - Terraform"
+# On pushes to main branch, deploy production backend.
+
+on:
+  workflow_dispatch:
+    inputs:
+      terraform_apply:
+        description: Apply the Terraform changes
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - terraform/modules/**
+      - terraform/environments/prod/**
+  pull_request:
+    types: [opened, reopened, review_requested]
+    branches:
+      - main
+    paths:
+      - terraform/modules/**
+      - terraform/environments/prod/**
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    name: Terraform
+    environment:
+      name: production
+      # url: ${{ steps.deployment-url.outputs.api_gateway_url }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ">=1.2.0"
+          terraform_wrapper: false
+      # Initialize Terraform instance
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./tf/environments/prod
+        shell: bash
+      # Validate the Terraform code
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+        working-directory: ./tf/environments/prod
+        shell: bash
+      # Plan out infrastructure changes
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -input=false -no-color -out tf.plan
+        working-directory: ./tf/environments/prod
+        continue-on-error: ${{ !(inputs.terraform_apply || (github.ref == 'refs/heads/main' && github.event_name == 'push')) }}
+        shell: bash
+        env:
+          TF_VAR_env: dev
+          TF_VAR_aws_region: us-east-1
+          TF_VAR_planetscale_service_token_id: ${{ secrets.PLANETSCALE_SERVICE_TOKEN_ID }}
+          TF_VAR_planetscale_service_token: ${{ secrets.PLANETSCALE_SERVICE_TOKEN }}
+          TF_VAR_planetscale_organization: ${{ secrets.PLANETSCALE_ORGANIZATION }}
+      # Print infrastructure changes to console
+      - name: Terraform Show
+        id: show
+        run: terraform show -no-color tf.plan 2>&1 > /tmp/plan.txt
+        working-directory: ./tf/environments/prod
+        shell: bash
+      # Comment infrastructure changes if this is a PR
+      - name: Comment on Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            // 1. Retrieve existing bot comments for the PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Terraform Plan Information')
+            })
+            // 2. Prepare format of the comment
+            const fs = require("fs");
+            const plan = fs.readFileSync("/tmp/plan.txt", "utf8");
+            const maxGitHubBodyCharacters = 65536;
+            function chunkSubstr(str, size) {
+              const numChunks = Math.ceil(str.length / size);
+              const chunks = new Array(numChunks);
+              for (let i = 0, o = 0; i < numChunks; i++, o += size) {
+                chunks[i] = str.substr(o, size);
+              }
+              return chunks;
+            }
+            // Split the Terraform plan into chunks if it's too big and 
+            // can't fit into the GitHub Action.
+            const plans = chunkSubstr(plan, maxGitHubBodyCharacters);
+            const output = `
+            # Terraform Plan Information (1/${plans.length})
+            > **Note**
+            > Despite what GitHub says, this PR has not been deployed. We require using environment secrets in \`terraform plan\` that are scoped to the environment, which automatically label workflows as deployments. In actuality, only merges and pushes are deployed.
+
+            | step  | status |
+            | --- | --- |
+            |Terraform Initialization | \`${{ steps.init.outcome }}\` |
+            | Terraform Plan | \`${{ steps.plan.outcome }}\` |
+
+            <details>
+
+            <summary>Show Plan</summary>
+
+            \`\`\`hcl
+            ${plans.length > 1 ? "...Output too large. See the rest in the workflow logs.\n" : ""}
+            ${plans[plans.length - 1]}
+            \`\`\`
+
+            </details>
+
+            | Pusher  | Action | Environment | Workflow |
+            | --- | --- | --- | --- |
+            | @${{ github.actor }} | \`${{ github.event_name }}\` | \`prod\` | \`${{ github.workflow }}\` |
+
+            *Information generated by \`terraform-prod.yaml\`*.
+            Last updated on: ${(new Date()).toLocaleString('en-US', { timeZone: 'America/New_York'})}
+            For commit: ${{ github.event.pull_request.head.sha }}
+            `;
+            // Replace current bot comment if found (disabled for now)
+            if (botComment && false) {
+              github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            // Otherwise, just add the comment
+            } else {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }
+      # Apply the infrastructure change
+      - name: Terraform Apply
+        if: ${{ inputs.terraform_apply || (github.ref == 'refs/heads/main' && github.event_name == 'push') }}
+        run: terraform apply -input=false tf.plan
+        working-directory: ./tf/environments/prod
+        shell: bash
+      # Set the URL from the Terraform output if applied
+      # - name: Set Deployment URL
+      #   id: deployment-url
+      #   if: ${{ inputs.terraform_apply || (github.ref == 'refs/heads/production' && github.event_name == 'push') }}
+      #   run: echo "api_gateway_url=$(terraform output api_gateway_url | tr -d '\"')" >> $GITHUB_OUTPUT
+      #   working-directory: ./tf/environments/prod
+      #   shell: bash
