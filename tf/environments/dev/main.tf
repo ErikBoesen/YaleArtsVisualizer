@@ -68,3 +68,13 @@ module "api" {
   planetscale_database_name = "yav-com-db"
   planetscale_organization  = var.planetscale_organization
 }
+
+// Scrapers: The Lambda functions that facilitate scraping Yale sites.
+// The 
+module "scrapers" {
+  source                  = "../../modules/scrapers"
+  env                     = var.env
+  planetscale_db_name     = "yav-com-db"
+  planetscale_db_username = var.planetscale_db_username
+  planetscale_db_password = var.planetscale_db_password
+}

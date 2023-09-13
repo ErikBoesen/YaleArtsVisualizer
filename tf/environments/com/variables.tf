@@ -24,11 +24,13 @@ variable "aws_region" {
 variable "planetscale_service_token_id" {
   description = "The ID of the PlanetScale service token."
   type        = string
+  sensitive   = true
 }
 
 variable "planetscale_service_token" {
   description = "The PlanetScale service token itself."
   type        = string
+  sensitive   = true
 }
 
 variable "planetscale_organization" {

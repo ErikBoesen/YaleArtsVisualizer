@@ -8,15 +8,20 @@ The `dev` Terraform module is deployed by the GitHub action defined in `terrafor
 
 In order for the GitHub Action to automatically deploy the `dev` infrastructure, it must be fed the correct environment-specific secrets. That is, the following should be set as environment secrets in the `development` GitHub environment:
 
-| Key | Description |
-| --- | ----------- |
+| Key                          | Description                                                            |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| PLANETSCALE_DB_PASSWORD_NAME | The name of a password for the `dev` branch of the PlanetScale db.     |
+| PLANETSCALE_DB_PASSWORD      | The corresponding password for the `dev` branch of the PlanetScale db. |
 
 The `dev` CI/CD pipeline also depends on three _repository_ secrets, which define the credentials passed to GitHub Actions:
 
-| Key                   | Description                                                                       |
-| --------------------- | --------------------------------------------------------------------------------- |
-| AWS_ACCESS_KEY_ID     | The access key ID for the `yav-com-terraform-deployer` user created by `com`.     |
-| AWS_SECRET_ACCESS_KEY | The secret access key for the `yav-com-terraform-deployer` user created by `com`. |
+| Key                          | Description                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------- |
+| AWS_ACCESS_KEY_ID            | The access key ID for the `yav-com-terraform-deployer` user created by `com`.             |
+| AWS_SECRET_ACCESS_KEY        | The secret access key for the `yav-com-terraform-deployer` user created by `com`.         |
+| PLANETSCALE_ORGANIZATION     | The name of the PlanetScale organization the database is in (probs `yaleartsvisualizer`). |
+| PLANETSCALE_SERVICE_TOKEN_ID | A service token ID for managing our PlanetScale resources.                                |
+| PLANETSCALE_SERVICE_TOKEN    | The corresponding service token for managing our PlanetScale resources.                   |
 
 With these secrets defined, the CI/CD pipeline should have all it needs to run its automated deploys.
 
@@ -34,9 +39,8 @@ To deploy or update the `dev` infrastructure _manually_––in case of failing 
 # 1. cd into the dev/ directory
 $ cd tf/environments/dev/
 
-# 2. ensure your access credentials are set (can also use an AWS_PROFILE)
-$ export AWS_ACCESS_KEY_ID=<yav-com-terraform-deployer AWS access key>
-$ export AWS_SECRET_ACCESS_KEY=<yav-com-terraform-deployer AWS secret access key>
+# 2. ensure your access credentials are set (can also use an AWS_ACCESS_KEY_ID, e.g.)
+$ export AWS_PROFILE=yav-tf
 
 # 3. initialize the Terraform modules and providers
 $ terraform init
@@ -80,6 +84,7 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_api"></a> [api](#module\_api) | ../../modules/api | n/a |
+| <a name="module_scrapers"></a> [scrapers](#module\_scrapers) | ../../modules/scrapers | n/a |
 
 ## Resources
 
@@ -90,6 +95,8 @@ No resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_env"></a> [env](#input\_env) | An env prefix to append to each resource created. | `string` | `"dev"` | no |
+| <a name="input_planetscale_db_password"></a> [planetscale\_db\_password](#input\_planetscale\_db\_password) | A PlanetScale DB branch password (get this from the Web UI). | `string` | `"SET THIS IN .tfvars ONCE DB BRANCH IS CREATED"` | no |
+| <a name="input_planetscale_db_username"></a> [planetscale\_db\_username](#input\_planetscale\_db\_username) | A PlanetScale DB branch username (get this from the Web UI). | `string` | `"SET THIS IN .tfvars ONCE DB BRANCH IS CREATED"` | no |
 | <a name="input_planetscale_organization"></a> [planetscale\_organization](#input\_planetscale\_organization) | The PlanetScale organization in which to make the DB. | `string` | n/a | yes |
 | <a name="input_planetscale_service_token"></a> [planetscale\_service\_token](#input\_planetscale\_service\_token) | The PlanetScale service token itself. | `string` | n/a | yes |
 | <a name="input_planetscale_service_token_id"></a> [planetscale\_service\_token\_id](#input\_planetscale\_service\_token\_id) | The ID of the PlanetScale service token. | `string` | n/a | yes |
