@@ -54,9 +54,9 @@ class ProductionPersonAssociation(Base):
     """An association table linking Productions to Persons."""
 
     __tablename__ = "productions_persons"
-    person_id: Mapped[int] = mapped_column(ForeignKey("person.id"), primary_key=True)
+    person_id: Mapped[int] = mapped_column(ForeignKey("persons.id"), primary_key=True)
     production_id: Mapped[int] = mapped_column(
-        ForeignKey("production.id"), primary_key=True
+        ForeignKey("productions.id"), primary_key=True
     )
     role: Mapped[str | None] = Column(String(200), nullable=True)
 

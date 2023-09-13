@@ -11,15 +11,15 @@ on:
     branches:
       - main
     paths:
-      - terraform/modules/**
-      - terraform/environments/prod/**
+      - tf/modules/**
+      - tf/environments/prod/**
   pull_request:
     types: [opened, reopened, review_requested]
     branches:
       - main
     paths:
-      - terraform/modules/**
-      - terraform/environments/prod/**
+      - tf/modules/**
+      - tf/environments/prod/**
 
 permissions:
   contents: read

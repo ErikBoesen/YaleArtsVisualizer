@@ -16,7 +16,7 @@ Next, you'll want to fill out a `.tfvars` file with configuration options for th
 Terraform variables for each environment. For example:
 
 ```ini
-# terraform/environments/dev/dev.tfvars
+# tf/environments/dev/dev.tfvars
 env                          = "dev"
 planetscale_service_token_id = <planetscale service token ID>
 planetscale_service_token    = <planetscale service token>
@@ -32,7 +32,7 @@ Given the above setup, to update the backend given valid credentials:
 
 ```bash
 # The below is for the dev environment
-cd terraform/environments/dev
+cd tf/environments/dev
 export AWS_PROFILE=yav-tf
 terraform init
 terraform plan -var-file=dev.tfvars -out=tfplan

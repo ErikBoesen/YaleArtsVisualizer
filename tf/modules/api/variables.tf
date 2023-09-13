@@ -13,6 +13,7 @@ variable "env" {
 variable "planetscale_database_name" {
   description = "The name of the PlanetScale database to branch from."
   type        = string
+  default     = "yav-com-db"
 }
 
 variable "planetscale_organization" {

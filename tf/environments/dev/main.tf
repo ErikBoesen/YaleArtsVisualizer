@@ -20,9 +20,13 @@ terraform {
 
   // add s3 backend
   backend "s3" {
-    bucket = "yale-arts-visualizer-terraform"
-    key    = "dev.tfstate"
-    region = "us-east-1"
+    bucket         = "yav-com-terraform-backend"
+    key            = "dev/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    kms_key_id     = "alias/yav-com-terraform-bucket-key"
+    dynamodb_table = "yav-com-terraform-backend-state"
+    role_arn       = "arn:aws:iam::850857403041:role/yav-com-terraform-backend-access"
   }
 }
 
@@ -38,22 +42,29 @@ provider "planetscale" {
   service_token    = var.planetscale_service_token
 }
 
+provider "aws" {
+  region = var.aws_region
+  default_tags {
+    tags = {
+      Environment = var.env
+      Project     = "Yale Arts Visualizer"
+    }
+  }
+
+  // Deployment role defined in "com" environment
+  assume_role {
+    role_arn = "arn:aws:iam::850857403041:role/yav-com-terraform-deployment"
+  }
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                   Modules                                  */
 /* -------------------------------------------------------------------------- */
-
-// DB: We create one DB for all environments, with different branches per
-// environment. 
-resource "planetscale_database" "main" {
-  organization = var.planetscale_organization
-  name         = "${local.prefix}-db"
-  region       = "us-east"
-}
 
 // API: Basically our entire backend (just a PlanetScale DB for now)
 module "api" {
   source                    = "../../modules/api"
   env                       = var.env
-  planetscale_database_name = planetscale_database.main.name
+  planetscale_database_name = "yav-com-db"
   planetscale_organization  = var.planetscale_organization
 }

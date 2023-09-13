@@ -11,15 +11,15 @@ on:
     branches:
       - dev
     paths:
-      - terraform/modules/**
-      - terraform/environments/dev/**
+      - tf/modules/**
+      - tf/environments/dev/**
   pull_request:
     types: [opened, reopened, review_requested]
     branches:
       - dev
     paths:
-      - terraform/modules/**
-      - terraform/environments/dev/**
+      - tf/modules/**
+      - tf/environments/dev/**
 
 permissions:
   contents: read
