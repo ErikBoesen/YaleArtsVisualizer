@@ -23,18 +23,20 @@ while True:
             'url': post['link'],
         })
     page += 1
-    if page == 2:
-        break
+    #if page == 2:
+    #    break
 
 authors = {}
 links = []
 for post in posts:
-    post_page = requests.get(post['url']).text
+    post_page = requests.get(post['url'], headers=headers).text
     soup = BeautifulSoup(post_page, 'html.parser')
-    links = soup.select('a.author.url')
+    author_links = soup.select('a.author.url')
     print(links)
-    for link in links:
-        author_id = link['href'].replace('https://yaledailynews.com/blog/author/', '').strip('/')
+    for link in author_links:
+        print(link)
+        print(link.get('href'))
+        author_id = link.get('href').replace('https://yaledailynews.com/blog/author/', '').strip('/')
         author_name = link.text.strip()
         if author_id not in authors:
             authors[author_id] = {
