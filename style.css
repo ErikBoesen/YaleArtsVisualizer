@@ -24,7 +24,11 @@ h1 {
 p {
 }
 button {
+    display: block;
+    margin-bottom: 6px;
+    font: inherit;
     background: none;
     border: solid 2px white;
     color: white;
+    padding: 5px 8px 3px;
 }
