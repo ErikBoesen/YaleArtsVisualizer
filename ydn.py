@@ -35,14 +35,16 @@ while True:
     print(f'Pulled page {page} of posts.')
     if not isinstance(posts_page, list):
         break
-    if post['categories']
     for post in posts_page:
+        category = None
+        if post['categories']:
+            category = categories[post['categories'][0]]
         posts.append({
             'id': post['id'],
             'slug': post['slug'],
             'url': post['link'],
             'date': post['date'].split('T')[0],
-            'category': categories[
+            'category': category,
         })
     page += 1
     if page == 100:
@@ -50,12 +52,12 @@ while True:
 
 authors = {}
 links = []
-for post in posts:
+for index, post in enumerate(posts):
+    print(f'Scraping authors of post {post}/{len(posts)}.')
     post_page = requests.get(post['url'], headers=headers).text
     soup = BeautifulSoup(post_page, 'html.parser')
     author_links = soup.select('a.author.url')
     for link in author_links:
-        print(link)
         print(link.get('href'))
         author_id = link.get('href').replace('https://yaledailynews.com/blog/author/', '').strip('/')
         author_name = link.text.strip()
