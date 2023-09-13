@@ -1,8 +1,8 @@
 /*
  * variables.tf
- * author: evan kirkiles
- * created on Thu Jan 05 2023
- * 2023 channel studio
+ * Author: Evan Kirkiles
+ * Created on: Wed Sep 13 2023
+ * 2023 Yale SWE 
  */
 
 

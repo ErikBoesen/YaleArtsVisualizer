@@ -60,6 +60,8 @@ $ terraform destroy
 > **Warning**
 > STILL, DO NOT DESTROY THE `com` ENVIRONMENT BEFORE BOTH THE `dev` AND `prod` BRANCHES. As the `com` environment manages the other two, if you destroy it before `dev` or `prod`, the key which encrypts their Terraform states in the S3 bucket will be destroyed and invalidate their requests to check their own states. If this happens, you will have to destroy `dev` and `prod` manually!
 
+# Terraform Docs
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 main.tf
 Author: Evan Kirkiles
