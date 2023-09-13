@@ -16,5 +16,9 @@
       "${commentprefix} ${year} ${company} ",
       "${commentend}"
     ]
-  }
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.analysis.extraPaths": ["./backend/lambda_layer"]
 }
