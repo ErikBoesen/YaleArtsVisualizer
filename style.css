@@ -2,6 +2,8 @@ body {
     background: #00356b;
     margin: 0;
     padding: 20px;
+    font-family: Helvetica, sans-serif;
+    color: white;
 }
 #graph {
     position: absolute;
@@ -10,11 +12,19 @@ body {
     right: 0;
     left: 0;
 }
+main {
+    z-index: 1;
+    position: relative;
+}
 h1 {
-    font-family: Helvetica, sans-serif;
     width: 20px;
     color: white;
     margin: 0;
-    z-index: 1;
-    position: relative;
+}
+p {
+}
+button {
+    background: none;
+    border: solid 2px white;
+    color: white;
 }
