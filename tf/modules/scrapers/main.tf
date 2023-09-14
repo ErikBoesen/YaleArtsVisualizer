@@ -5,8 +5,6 @@
  * 2023 Yale SWE 
  */
 
-
-
 terraform {
   required_providers {
     aws = {
@@ -15,4 +13,8 @@ terraform {
     }
   }
   required_version = ">= 1.2.0"
+}
+
+locals {
+  prefix = "yav-${var.env}"
 }

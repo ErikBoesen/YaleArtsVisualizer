@@ -74,6 +74,7 @@ module "api" {
 module "scrapers" {
   source                  = "../../modules/scrapers"
   env                     = var.env
+  aws_region              = var.aws_region
   planetscale_db_name     = "yav-com-db"
   planetscale_db_username = var.planetscale_db_username
   planetscale_db_password = var.planetscale_db_password

@@ -5,6 +5,11 @@
  * 2023 Yale SWE 
  */
 
+variable "aws_region" {
+  description = "The AWS region in which to create resources."
+  type        = string
+  default     = "us-east-1"
+}
 
 variable "env" {
   description = "An env prefix to append to each resource created."

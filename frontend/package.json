@@ -1,0 +1,30 @@
+{
+  "name": "yav-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "prisma:studio": "dotenv -e .env.local -- yarn prisma studio",
+    "prisma:generate": "dotenv -e .env.local -- yarn prisma generate --generator client",
+    "prisma:pushdb": "dotenv -e .env.local -- yarn prisma db push --skip-generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.3.0",
+    "next": "13.4.19",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.6.0",
+    "@types/react": "18.2.21",
+    "@types/react-dom": "18.2.7",
+    "dotenv-cli": "^7.3.0",
+    "eslint": "8.49.0",
+    "eslint-config-next": "13.4.19",
+    "prisma": "^5.3.0",
+    "typescript": "5.2.2"
+  }
+}

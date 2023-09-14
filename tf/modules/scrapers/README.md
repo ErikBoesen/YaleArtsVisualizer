@@ -26,7 +26,6 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_lambda_layer_sqlalchemy"></a> [lambda\_layer\_sqlalchemy](#module\_lambda\_layer\_sqlalchemy) | terraform-aws-modules/lambda/aws | n/a |
-| <a name="module_lambda_schema"></a> [lambda\_schema](#module\_lambda\_schema) | terraform-aws-modules/lambda/aws | n/a |
 
 ## Resources
 
@@ -36,6 +35,7 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region in which to create resources. | `string` | `"us-east-1"` | no |
 | <a name="input_env"></a> [env](#input\_env) | An env prefix to append to each resource created. | `string` | n/a | yes |
 | <a name="input_planetscale_db_name"></a> [planetscale\_db\_name](#input\_planetscale\_db\_name) | The name of the PlanetScale database. | `string` | `"yav-com-db"` | no |
 | <a name="input_planetscale_db_password"></a> [planetscale\_db\_password](#input\_planetscale\_db\_password) | A PlanetScale DB branch password (get this from the Web UI). | `string` | n/a | yes |

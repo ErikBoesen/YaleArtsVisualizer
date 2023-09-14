@@ -77,7 +77,9 @@ Created on: Wed Sep 13 2023
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_local"></a> [local](#provider\_local) | 2.4.0 |
 
 ## Modules
 
@@ -88,12 +90,15 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [local_file.frontend_env](https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | The AWS region in which to create resources. | `string` | `"us-east-1"` | no |
 | <a name="input_env"></a> [env](#input\_env) | An env prefix to append to each resource created. | `string` | `"dev"` | no |
 | <a name="input_planetscale_db_password"></a> [planetscale\_db\_password](#input\_planetscale\_db\_password) | A PlanetScale DB branch password (get this from the Web UI). | `string` | `"SET THIS IN .tfvars ONCE DB BRANCH IS CREATED"` | no |
 | <a name="input_planetscale_db_username"></a> [planetscale\_db\_username](#input\_planetscale\_db\_username) | A PlanetScale DB branch username (get this from the Web UI). | `string` | `"SET THIS IN .tfvars ONCE DB BRANCH IS CREATED"` | no |
