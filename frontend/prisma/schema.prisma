@@ -19,9 +19,9 @@ generator client {
 
 // Python Prisma client for our scraper
 generator scraper {
-  provider = "prisma-client-py"
+  provider             = "prisma-client-py"
+  interface            = "sync"
   recursive_type_depth = 5
-  output = "../../"
 }
 
 // --------------------------------- Schema --------------------------------- //

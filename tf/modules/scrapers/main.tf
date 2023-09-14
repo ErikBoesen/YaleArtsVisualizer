@@ -16,5 +16,6 @@ terraform {
 }
 
 locals {
-  prefix = "yav-${var.env}"
+  prefix              = "yav-${var.env}"
+  lambda_database_url = "mysql://${var.planetscale_db_username}:${var.planetscale_db_password}@aws.connect.psdb.cloud/yav-com-db?sslaccept=strict&sslcert=/etc/pki/tls/cert.pem"
 }

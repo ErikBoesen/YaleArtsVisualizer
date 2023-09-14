@@ -1,2 +1,1 @@
-sqlalchemy==2.0.20
-mysql-connector-python==8.1.0
+prisma==0.10.0

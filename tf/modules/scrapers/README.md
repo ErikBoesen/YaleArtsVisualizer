@@ -25,7 +25,8 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_lambda_layer_sqlalchemy"></a> [lambda\_layer\_sqlalchemy](#module\_lambda\_layer\_sqlalchemy) | terraform-aws-modules/lambda/aws | n/a |
+| <a name="module_lambda_layer_prisma"></a> [lambda\_layer\_prisma](#module\_lambda\_layer\_prisma) | terraform-aws-modules/lambda/aws | n/a |
+| <a name="module_lambda_scraper_collegearts"></a> [lambda\_scraper\_collegearts](#module\_lambda\_scraper\_collegearts) | terraform-aws-modules/lambda/aws | n/a |
 
 ## Resources
 
