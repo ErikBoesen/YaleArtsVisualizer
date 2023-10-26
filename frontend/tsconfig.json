@@ -19,6 +19,7 @@
       }
     ],
     "paths": {
+      "@/fonts": ["./src/assets/fonts"],
       "@/*": ["./src/*"]
     }
   },

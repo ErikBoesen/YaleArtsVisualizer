@@ -1,0 +1,38 @@
+/*
+ * Layout.module.scss
+ * Author: Evan Kirkiles
+ * Created on: Thu Oct 26 2023
+ * 2023 Yale SWE 
+ */
+@import "@/styles/utils";
+
+.body {
+  display: grid;
+  grid-template:
+    "nav" auto
+    "main" auto
+    "footer" auto / 1fr;
+  width: 100%;
+
+  & > nav,
+  & > main:not([data-type="sanity"]),
+  & > footer {
+    width: calc(100%);
+    // max-width: var(--max-main-width);
+    // margin: 0 auto;
+  }
+
+  & > nav {
+    grid-area: nav;
+  }
+
+  & > main {
+    grid-area: main;
+    min-height: calc(100vh - (2 * var(--header-height)));
+    min-height: calc(100svh - (2 * var(--header-height)));
+  }
+
+  & > footer {
+    grid-area: footer;
+  }
+}

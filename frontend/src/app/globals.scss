@@ -1,0 +1,52 @@
+/*
+ * globals.scss
+ * Author: evan kirkiles
+ * Created On Sun Aug 27 2023
+ * 2023 Design at Yale 
+ *
+ * There are several useful variables defined at the :root level, feel free to
+ * modify or remove as necessary for your own use cases.
+ */
+
+@import "@/styles/utils";
+@import "@/styles/globals";
+
+:root {
+  // a color to indicate selected / focused elements
+  --highlight-color: #{theme-color("red")};
+
+  // header-height for calculating sticky offsets
+  --header-height: 4rem;
+
+  // a standard padding to use across the page
+  --page-padding: 1rem;
+  @include media("md") {
+    --page-padding: 2rem;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Globals                                  */
+/* -------------------------------------------------------------------------- */
+
+html,
+body {
+  width: 100%;
+  background-color: theme-color("background");
+  color: theme-color("content");
+  line-height: 1.2;
+
+  // "debug" mode
+  // & *:not(svg, g, path) {
+  //   outline: 1px solid theme-color('red');
+  // }
+}
+
+::selection {
+  background-color: theme-color("content");
+  color: theme-color("background");
+}
+
+:focus-visible {
+  outline: 1px solid var(--highlight-color);
+}
