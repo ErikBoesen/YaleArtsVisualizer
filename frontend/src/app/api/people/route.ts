@@ -6,9 +6,10 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { withAccelerate } from "@prisma/extension-accelerate";
 import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient().$extends(withAccelerate());
 
 export async function GET() {
   const people = await prisma.person.findMany();
