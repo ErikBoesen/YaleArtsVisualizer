@@ -18,6 +18,7 @@
   & > header,
   & > main:not([data-type="sanity"]),
   & > footer {
+    z-index: zIndex("low");
     width: calc(100%);
     // max-width: var(--max-main-width);
     // margin: 0 auto;
