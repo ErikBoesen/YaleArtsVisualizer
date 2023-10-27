@@ -1,0 +1,39 @@
+/*
+ * Graph.module.scss
+ * Author: Evan Kirkiles
+ * Created on: Fri Oct 27 2023
+ * 2023 Yale SWE 
+ */
+@import "@/styles/utils";
+
+.container {
+  grid-area: graph;
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: var(--page-padding);
+    right: unset;
+    left: 0;
+    width: 1px;
+    height: auto;
+    background-color: theme-color("content");
+
+    display: none;
+    @include media("md") {
+      display: block;
+    }
+  }
+
+  & > div {
+    display: contents;
+  }
+
+  // & #force-graph-container {
+  //   width: 100%;
+  //   height: 100%;
+  // }
+}

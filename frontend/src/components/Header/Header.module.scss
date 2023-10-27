@@ -1,0 +1,61 @@
+/*
+ * Header.scss
+ * Author: Evan Kirkiles
+ * Created on: Thu Oct 26 2023
+ * 2023 Yale SWE 
+ */
+@import "@/styles/utils";
+
+.container {
+  width: 100%;
+  height: var(--header-height);
+  padding: var(--page-padding);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1em;
+  position: sticky;
+  top: 0;
+  background-color: theme-color("background");
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: var(--page-padding);
+    right: var(--page-padding);
+    bottom: 0;
+    top: unset;
+    height: 1px;
+    background-color: theme-color("content");
+
+    @include media("md") {
+      width: 100%;
+    }
+  }
+
+  & > nav {
+    display: contents;
+  }
+
+  & ul {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+    line-height: 1;
+
+    &:last-of-type {
+      margin-left: auto;
+      text-align: right;
+    }
+  }
+}
+
+.logo {
+  display: contents;
+
+  & > svg {
+    height: 100%;
+    width: auto;
+  }
+}

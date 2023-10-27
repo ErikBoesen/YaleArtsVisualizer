@@ -1,0 +1,40 @@
+/*
+ * Home.module.scss
+ * Author: Evan Kirkiles
+ * Created on: Fri Oct 27 2023
+ * 2023 Yale SWE 
+ */
+@import "@/styles/utils";
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.immediate_explore {
+  & h2 {
+    position: relative;
+    padding: 0.5em 0;
+    font-weight: 700;
+    margin-bottom: 0.5em;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      top: unset;
+      height: 1px;
+      background-color: theme-color("content");
+
+      @include media("md") {
+        width: calc(100% + 2 * var(--page-padding));
+      }
+    }
+  }
+
+  & li {
+    font-size: 2em;
+    padding: 0.05em 0;
+  }
+}

@@ -19,8 +19,10 @@
     "next": "^14.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-force-graph-2d": "^1.25.2",
     "react-icons": "^4.11.0",
-    "react-transition-hooks": "^1.2.0"
+    "swr": "^2.2.4",
+    "transition-hook": "^1.5.2"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.2",

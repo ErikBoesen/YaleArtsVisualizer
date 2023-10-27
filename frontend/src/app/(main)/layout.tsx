@@ -6,6 +6,9 @@
  */
 
 import Providers from "@/app/(main)/_components/Providers";
+import Graph from "@/components/Graph";
+import Header from "@/components/Header";
+import SplashScreen from "@/components/SplashScreen";
 import { GA4_TAG } from "@/env";
 import Script from "next/script";
 import { PropsWithChildren } from "react";
@@ -26,8 +29,11 @@ export default function MainLayout({ children }: PropsWithChildren) {
           gtag('config', '${GA4_TAG}');
       `}
       </Script>
+      <Header />
       {/* TODO: Layout components */}
       {children}
+      <Graph />
+      <SplashScreen />
     </Providers>
   );
 }

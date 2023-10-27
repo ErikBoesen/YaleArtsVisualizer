@@ -1,0 +1,57 @@
+/*
+ * SplashScreen.module.scss
+ * Author: Evan Kirkiles
+ * Created on: Fri Oct 27 2023
+ * 2023 Yale SWE 
+ */
+@import "@/styles/utils";
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: zIndex("high");
+  height: 100vh;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  background-color: theme-color("background");
+  padding: var(--page-padding);
+  grid-template:
+    ". . ." 1fr
+    ". logo ." auto
+    ". sublogo ." auto
+    ". . ." 1fr / 1fr auto 1fr;
+  gap: 0.5em;
+
+  padding-bottom: 1em;
+  @include media("xs") {
+    padding-bottom: 2em;
+  }
+
+  animation: fade-out 0.7s ease-in-out;
+  animation-delay: 2s;
+  animation-fill-mode: forwards;
+}
+
+.logo {
+  grid-area: logo;
+  width: min(calc(100vw - 2 * var(--page-padding)), 20em);
+  height: auto;
+}
+
+.sublogo {
+  grid-area: sublogo;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding-left: 1em;
+}

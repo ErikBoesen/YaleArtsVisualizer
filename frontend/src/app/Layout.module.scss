@@ -9,12 +9,13 @@
 .body {
   display: grid;
   grid-template:
-    "nav" auto
+    "header" auto
+    "graph" auto
     "main" auto
     "footer" auto / 1fr;
   width: 100%;
 
-  & > nav,
+  & > header,
   & > main:not([data-type="sanity"]),
   & > footer {
     width: calc(100%);
@@ -22,17 +23,39 @@
     // margin: 0 auto;
   }
 
-  & > nav {
-    grid-area: nav;
+  & > header {
+    grid-area: header;
   }
 
   & > main {
     grid-area: main;
-    min-height: calc(100vh - (2 * var(--header-height)));
-    min-height: calc(100svh - (2 * var(--header-height)));
+    padding: calc(0.5 * var(--page-padding)) var(--page-padding);
+    min-height: calc(100vh - var(--header-height) - 10px);
+    min-height: calc(100svh - var(--header-height) - 10px);
   }
 
   & > footer {
     grid-area: footer;
+  }
+
+  @include media("md") {
+    grid-template:
+      "header header" auto
+      "main graph" auto
+      "footer graph" auto / auto 1fr;
+  }
+
+  @include media("lg") {
+    grid-template:
+      "header graph" auto
+      "main graph" auto
+      "footer graph" auto / min(40vw, 55ch) 1fr;
+  }
+
+  @include media("xl") {
+    grid-template:
+      "header graph" auto
+      "main graph" auto
+      "footer graph" auto / min(40vw, 55ch) 1fr;
   }
 }

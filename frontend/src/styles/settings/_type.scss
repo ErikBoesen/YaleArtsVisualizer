@@ -14,10 +14,10 @@
  */
 
 $body-type-sizes: (
-  'default': 14px,
-  'xs': 16px,
-  'lg': 18px,
-  'xxl': 20px,
+  "default": 16px,
+  "xs": 20px,
+  "xl": 22px,
+  "xxxl": 24px,
 );
 
 $body-font: var(--font-abcdiatype), sans-serif, Helvetica, Geneva;
