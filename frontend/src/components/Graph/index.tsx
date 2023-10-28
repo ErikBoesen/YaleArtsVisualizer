@@ -10,7 +10,13 @@ import { useEffect, useRef, useState } from "react";
 import s from "./Graph.module.scss";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import useSWR from "swr";
+import { debounce } from "debounce";
 import { fetcher } from "@/util/swr";
+
+interface Dimensions {
+  width?: number;
+  height?: number;
+}
 
 /**
  * The Graph component consumes serialized queries from the GraphProvider, turns
@@ -18,26 +24,43 @@ import { fetcher } from "@/util/swr";
  * data in the commonly-shared top-level graph (on pages where it is relevant).
  */
 export default function Graph() {
+  // an imperative handle for modifying the force graph instance
   const graphRef = useRef<ForceGraphMethods<any, any> | undefined>(undefined);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+
+  // the below resizes the dimensions state based on the size of the container
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState<Dimensions>({});
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const listener: ResizeObserverCallback = debounce(([{ contentRect }]) => {
+      const { width, height } = contentRect;
+      setDimensions({ width, height });
+    }, 100);
+    const observer = new ResizeObserver(listener);
+    observer.observe(containerRef.current, { box: "content-box" });
+    return () => observer.disconnect();
+  }, []);
 
   // fetch data for existing query
   const { data } = useSWR("/ydn_graph.json", fetcher);
 
   return (
-    <section className={s.container} suppressHydrationWarning>
-      {typeof window !== "undefined" && mounted && (
-        <ForceGraph2D
-          nodeId="id"
-          nodeColor="color"
-          linkColor="color"
-          ref={graphRef}
-          // enableZoomInteraction={false}
-          // enablePanInteraction={false}
-          graphData={data || { nodes: [], links: [] }}
-        />
-      )}
+    <section
+      className={s.container}
+      ref={containerRef}
+      suppressHydrationWarning
+    >
+      <ForceGraph2D
+        nodeId="id"
+        nodeColor="color"
+        linkColor="color"
+        ref={graphRef}
+        {...dimensions}
+        // nodeCanvasObject={}
+        // enableZoomInteraction={false}
+        // enablePanInteraction={false}
+        graphData={data || { nodes: [], links: [] }}
+      />
     </section>
   );
 }

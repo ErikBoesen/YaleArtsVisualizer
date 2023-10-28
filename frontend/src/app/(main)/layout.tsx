@@ -6,12 +6,17 @@
  */
 
 import Providers from "@/app/(main)/_components/Providers";
-import Graph from "@/components/Graph";
 import Header from "@/components/Header";
 import SplashScreen from "@/components/SplashScreen";
 import { GA4_TAG } from "@/env";
+import dynamic from "next/dynamic";
 import Script from "next/script";
 import { PropsWithChildren } from "react";
+
+const Graph = dynamic(() => import("@/components/Graph"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
 
 export default function MainLayout({ children }: PropsWithChildren) {
   return (
