@@ -57,7 +57,7 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#312a7b" />
         <meta name="msapplication-TileColor" content="#312a7b" />
-        <meta name="theme-color" content="#312a7b" />
+        <meta name="theme-color" content="#00356B" />
         {/* <ColorSchemeScript /> */}
       </head>
       <body className={s.body}>{children}</body>
