@@ -12,6 +12,10 @@ import { NextResponse } from "next/server";
 const prisma = new PrismaClient().$extends(withAccelerate());
 
 export async function GET() {
-  const people = await prisma.person.findMany();
-  return NextResponse.json({ people });
+  const people = await prisma.person.findMany({
+    include: {
+      productions: true,
+    },
+  });
+  return NextResponse.json(people);
 }

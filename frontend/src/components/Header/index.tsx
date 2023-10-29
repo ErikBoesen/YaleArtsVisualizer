@@ -21,10 +21,10 @@ export default function Header() {
             <Link href="/">Home</Link>
           </li>
           <li>
-            <Link href="/explore">Explore</Link>
+            <Link href="/people">People</Link>
           </li>
           <li>
-            <Link href="/">Search</Link>
+            <Link href="/productions">Productions</Link>
           </li>
         </ul>
         <ul>

@@ -36,7 +36,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
       </Script>
       <Header />
       {/* TODO: Layout components */}
-      {children}
+      <main>{children}</main>
       <Graph />
       <SplashScreen />
     </Providers>
