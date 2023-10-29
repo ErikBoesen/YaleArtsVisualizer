@@ -12,6 +12,8 @@ import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import useSWR from "swr";
 import { debounce } from "debounce";
 import { fetcher } from "@/util/swr";
+import { useAtomValue } from 'jotai';
+import { dataSourceAtom } from '@/app/state';
 
 interface Dimensions {
   width?: number;
@@ -24,6 +26,11 @@ interface Dimensions {
  * data in the commonly-shared top-level graph (on pages where it is relevant).
  */
 export default function Graph() {
+
+  // fetch data for existing query
+  const dataPath = useAtomValue(dataSourceAtom);
+  const { data: graphData } = useSWR(dataPath, fetcher);
+
   // an imperative handle for modifying the force graph instance
   const graphRef = useRef<ForceGraphMethods<any, any> | undefined>(undefined);
 
@@ -41,9 +48,6 @@ export default function Graph() {
     return () => observer.disconnect();
   }, []);
 
-  // fetch data for existing query
-  const { data } = useSWR("/ydn_graph.json", fetcher);
-
   return (
     <section
       className={s.container}
@@ -59,7 +63,7 @@ export default function Graph() {
         // nodeCanvasObject={}
         // enableZoomInteraction={false}
         // enablePanInteraction={false}
-        graphData={data || { nodes: [], links: [] }}
+        graphData={graphData || { nodes: [], links: [] }}
       />
     </section>
   );

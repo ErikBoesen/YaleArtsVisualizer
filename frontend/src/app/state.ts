@@ -6,3 +6,8 @@
  *
  * This file defines the global state atoms needed for our application.
  */
+
+import { atom } from 'jotai'
+
+export const dataSourceAtom = atom("");
+export const selectedNodeAtom = atom("");
