@@ -9,6 +9,7 @@
 datasource db {
   provider = "mysql"
   url = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_DIRECT")
   relationMode = "prisma"
 }
 
@@ -24,33 +25,91 @@ generator scraper {
   recursive_type_depth = 5
 }
 
-// --------------------------------- Schema --------------------------------- //
+// -------------------------------------------------------------------------- */
+//                                   Schema                                   */
+// -------------------------------------------------------------------------- */
+
+// ---------------------------------- Enums --------------------------------- */
+model Organization {
+  id            String  @db.VarChar(64) @id
+
+  // Actual organization data
+  title         String  @db.VarChar(255)
+  description   String  @db.MediumText()
+
+  // Relationships
+  productions   Production[]
+}
+
+// --------------------------------- Models --------------------------------- */
 
 model Production {
-  id            Int       @default(autoincrement()) @id
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  title         String    @db.VarChar(255)
-  date          DateTime  @db.Date
-  persons       ProductionPersonEdge[]
+  id              Int         @id @default(autoincrement())
+
+  // Actual production data
+  name            String    @db.VarChar(255)
+  date            DateTime? @db.Date
+  href            String    @db.VarChar(255)
+  imageHref       String?   @db.VarChar(255)
+  description     String?   @db.MediumText()
+
+  // Constraints, unique production per org id / slug
+  organizationId  String    @db.VarChar(64)
+  slug            String    @db.VarChar(255)
+  @@unique([slug, organizationId])
+
+  // Relationships
+  persons         ProductionPersonEdge[]
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  @@index([organizationId])
+
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model ProductionPersonEdge {
-  id            Int         @id @default(autoincrement())
-  production    Production  @relation(fields: [productionId], references: [id])
-  person        Person      @relation(fields: [personId], references: [id])
-  role          String?     @db.VarChar(255)
-  productionId  Int
-  personId      Int
+  id              Int         @id @default(autoincrement())
 
+  // Actual edge data
+  role            String      @db.VarChar(255) @default("")
+  group           String?     @db.VarChar(255)
+
+  // Constraints, unique edge per production / person / role combo
+  productionId    Int
+  personId        Int
+  @@unique([productionId, personId, role])
+
+  // Relationships
+  production      Production  @relation(fields: [productionId], references: [id])
+  person          Person      @relation(fields: [personId], references: [id])
   @@index([productionId])
   @@index([personId])
+
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model Person {
   id            Int       @default(autoincrement()) @id
+
+  // Actual person data
+  name          String    @db.VarChar(255)
+  slugName      String    @db.VarChar(255)
+  year          Int       @default(0) // Our "default" class year is 0 for those w/o year
+  href          String?   @db.VarChar(255)
+  imageHref     String?   @db.VarChar(255)
+  description   String?   @db.MediumText()
+
+  // Constraints, unique person per slugged name / class. We should figure out
+  // a better way to differentiate people, but we're heavily limited here.
+  @@unique([slugName, year])
+
+  // Relationships
+  productions   ProductionPersonEdge[]
+
+  // Metadata
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  name          String    @db.VarChar(255)
-  productions   ProductionPersonEdge[]
 }

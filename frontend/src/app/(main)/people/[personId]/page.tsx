@@ -5,6 +5,7 @@
  * 2023 Yale SWE
  */
 
+import GraphData from "@/components/Graph/GraphData";
 import { prisma } from "@/util/prisma";
 import { notFound } from "next/navigation";
 
@@ -28,7 +29,7 @@ export default async function PersonPage({
     <article>
       PERSON:
       <h1>{person.name}</h1>
-      {/* <GraphData source="/api/people/a" /> */}
+      <GraphData source={`/api/graph/people/${person.id}?depth=3`} />
     </article>
   );
 }

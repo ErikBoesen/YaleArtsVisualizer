@@ -5,6 +5,7 @@
  * 2023 Yale SWE
  */
 
+import GraphData from "@/components/Graph/GraphData";
 import { prisma } from "@/util/prisma";
 import { notFound } from "next/navigation";
 
@@ -21,16 +22,35 @@ export default async function ProductionPage({
     const id = parseInt(productionId);
     var production = await prisma.production.findFirstOrThrow({
       where: { id },
+      include: {
+        persons: {
+          select: {
+            id: true,
+            role: true,
+            group: true,
+            person: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
   } catch (e) {
+    console.error(e);
     notFound();
   }
 
   return (
     <article>
       PRODUCTION:
-      <h1>{production.title}</h1>
-      {/* <GraphData source="/api/people/a" /> */}
+      <h1>{production.name}</h1>
+      {production.persons.map(({ id, role, group, person }, index) => (
+        <li key={id}>{person.name}</li>
+      ))}
+      <GraphData source={`/api/graph/productions/${production.id}?depth=3`} />
     </article>
   );
 }

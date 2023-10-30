@@ -20,7 +20,7 @@ export default async function ProductionsPage() {
         {productions.map((production) => (
           <li key={production.id}>
             <Link href={`/productions/${production.id}`}>
-              {production.title}
+              {production.name}
             </Link>
           </li>
         ))}
