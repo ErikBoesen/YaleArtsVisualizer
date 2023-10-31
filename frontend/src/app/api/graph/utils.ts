@@ -8,9 +8,15 @@
 import { ProductionPersonEdge } from "@prisma/client";
 import { LinkObject, NodeObject } from "react-force-graph-2d";
 
+export const ENDPOINT_TABLE_MAP = {
+  productions: "production",
+  people: "person",
+} as const;
+
+export type NodeEndpoint = keyof typeof ENDPOINT_TABLE_MAP;
+
 const SELECTS = {
-  productions: {
-    nextEdge: "persons",
+  production: {
     nextNode: "person",
     select: {
       _type: true,
@@ -19,8 +25,7 @@ const SELECTS = {
       organizationId: true,
     },
   },
-  persons: {
-    nextEdge: "productions",
+  person: {
     nextNode: "production",
     select: {
       _type: true,
@@ -39,14 +44,14 @@ const SELECTS = {
  * @returns
  */
 export function generateSelectStatement(
-  nodeType: "productions" | "persons",
+  nodeType: "production" | "person",
   k = 1
 ) {
   const selector = { ...SELECTS[nodeType].select };
   let currIter = selector;
   if (k === 0) return selector;
   while (k > 0) {
-    const { nextEdge, nextNode } = SELECTS[nodeType];
+    const { nextNode } = SELECTS[nodeType];
     const newSelector = {
       select: {
         _type: true,
@@ -57,17 +62,17 @@ export function generateSelectStatement(
         personId: true,
         [nextNode]: {
           select: {
-            ...SELECTS[nextEdge].select,
+            ...SELECTS[nextNode].select,
           },
         },
       },
     };
-    // @ts-ignore (Typing not worth the effort here)
-    currIter[nextEdge] = newSelector;
+    // @ts-ignore
+    currIter[`${nextNode}s`] = newSelector;
     // @ts-ignore
     currIter = newSelector.select[nextNode].select;
     k -= 1;
-    nodeType = nextEdge;
+    nodeType = nextNode;
   }
   return selector;
 }

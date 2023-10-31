@@ -6,6 +6,7 @@
  */
 import Link from "next/link";
 import { prisma } from "@/util/prisma";
+import GraphData from "@/components/Graph/GraphData";
 
 // revalidate every hour
 export const revalidate = 3600;
@@ -25,6 +26,7 @@ export default async function ProductionsPage() {
           </li>
         ))}
       </ul>
+      <GraphData source={["productions", undefined, { depth: "2" }]} />
     </article>
   );
 }

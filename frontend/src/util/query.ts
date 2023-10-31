@@ -5,19 +5,19 @@
  * 2023 Yale SWE
  */
 
+import { NodeEndpoint } from "@/app/api/graph/utils";
 import { GraphData } from "react-force-graph-2d";
 import { QueryClient, useQuery } from "react-query";
 
-type NodeFetchType = "people" | "productions";
 type NodeFetchId = number;
 type NodeFetchOptions = {
   depth?: string;
 };
 
 export type NodeQueryKey =
-  | [NodeFetchType]
-  | [NodeFetchType, NodeFetchId]
-  | [NodeFetchType, NodeFetchId | undefined, NodeFetchOptions]
+  | [NodeEndpoint]
+  | [NodeEndpoint, NodeFetchId]
+  | [NodeEndpoint, NodeFetchId | undefined, NodeFetchOptions]
   | ["static", string];
 
 export const queryClient = new QueryClient({});

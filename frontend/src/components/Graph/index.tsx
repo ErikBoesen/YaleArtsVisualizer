@@ -152,8 +152,6 @@ export default function Graph() {
     ctx.stroke();
   }
 
-  console.log(graphData);
-
   return (
     <section
       className={s.container}
@@ -175,12 +173,12 @@ export default function Graph() {
         }
         linkHoverPrecision={10}
         // nodeRelSize={5}
-        cooldownTicks={100}
-        onEngineStop={() => {
-          if (!containerRef.current) return;
-          const { width } = containerRef.current.getBoundingClientRect();
-          graphRef.current?.zoomToFit(300, width * 0.05);
-        }}
+        // cooldownTicks={100}
+        // onEngineStop={() => {
+        //   if (!containerRef.current) return;
+        //   const { width } = containerRef.current.getBoundingClientRect();
+        //   graphRef.current?.zoomToFit(300, width * 0.05);
+        // }}
         graphData={graphData || { nodes: [], links: [] }}
       />
     </section>

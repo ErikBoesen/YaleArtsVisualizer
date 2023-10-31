@@ -6,6 +6,8 @@
  */
 
 import {
+  ENDPOINT_TABLE_MAP,
+  NodeEndpoint,
   generateSelectStatement,
   parseNodesAndLinks,
 } from "@/app/api/graph/utils";
@@ -14,26 +16,27 @@ import { NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
   params: {
-    productionId: string;
+    nodeType: NodeEndpoint;
+    nodeId: string;
   };
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { productionId } = params;
-
+  const { nodeType, nodeId } = params;
+  const table = ENDPOINT_TABLE_MAP[nodeType];
   // Parse query graph depth (k) from params, default is 1
   const { searchParams } = req.nextUrl;
   const depth = parseInt(searchParams.get("depth") || "1");
 
   // Fetch the data from the graph
-  const select = generateSelectStatement("productions", depth);
-  const result = await prisma.production.findFirst({
-    where: { id: parseInt(productionId) },
+  const select = generateSelectStatement(table, depth);
+  const result = await prisma[table].findFirst({
+    where: { id: parseInt(nodeId) },
     select,
   });
   if (!result)
     return NextResponse.json(
-      { success: false, message: "Production not found." },
+      { success: false, message: "Person not found." },
       { status: 404 }
     );
 

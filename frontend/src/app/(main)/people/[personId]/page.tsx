@@ -56,7 +56,7 @@ export default async function PersonPage({
           </li>
         ))}
       </ul>
-      <GraphData source={["people", person.id, { depth: "4" }]} />
+      <GraphData source={["people", person.id, { depth: "2" }]} />
     </article>
   );
 }
