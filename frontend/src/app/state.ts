@@ -7,7 +7,8 @@
  * This file defines the global state atoms needed for our application.
  */
 
-import { atom } from 'jotai'
+import { NodeQueryKey } from "@/util/query";
+import { atom } from "jotai";
 
-export const dataSourceAtom = atom("");
+export const dataSourceAtom = atom<NodeQueryKey>(["static", "home"]);
 export const selectedNodeAtom = atom("");

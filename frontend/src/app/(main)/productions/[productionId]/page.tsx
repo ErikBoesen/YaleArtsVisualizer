@@ -7,6 +7,7 @@
 
 import GraphData from "@/components/Graph/GraphData";
 import { prisma } from "@/util/prisma";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface RouteParams {
@@ -48,9 +49,11 @@ export default async function ProductionPage({
       PRODUCTION:
       <h1>{production.name}</h1>
       {production.persons.map(({ id, role, group, person }, index) => (
-        <li key={id}>{person.name}</li>
+        <li key={id}>
+          <Link href={`/people/${person.id}`}>{person.name}</Link>
+        </li>
       ))}
-      <GraphData source={`/api/graph/productions/${production.id}?depth=3`} />
+      <GraphData source={["productions", production.id, { depth: "4" }]} />
     </article>
   );
 }

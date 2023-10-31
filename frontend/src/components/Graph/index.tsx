@@ -9,11 +9,10 @@
 import { useEffect, useRef, useState } from "react";
 import s from "./Graph.module.scss";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
-import useSWR from "swr";
 import { debounce } from "debounce";
-import { fetcher } from "@/util/swr";
 import { useAtomValue } from "jotai";
 import { dataSourceAtom } from "@/app/state";
+import { useGraphQuery } from "@/util/query";
 
 interface Dimensions {
   width?: number;
@@ -28,11 +27,7 @@ interface Dimensions {
 export default function Graph() {
   // fetch data for existing query
   const dataPath = useAtomValue(dataSourceAtom);
-  const { data: graphData } = useSWR(
-    dataPath,
-    // "/api/graph/productions/2?depth=3",
-    fetcher
-  );
+  const { data: graphData, isLoading } = useGraphQuery(...dataPath);
 
   // an imperative handle for modifying the force graph instance
   const graphRef = useRef<ForceGraphMethods<any, any> | undefined>(undefined);
@@ -57,6 +52,7 @@ export default function Graph() {
 
   // Current colors based on: https://coolors.co/palette/011f5b-003262-0f4d92-2774ae-b9d9eb-faebd7-f58025-a51c30-8c1515-800000
   const BASE_NODE_COLOR = "#0f4d92";
+  const NODE_2_COLOR = "#ffffff";
   const BASE_LINK_COLOR = "#003262";
   const HIGHLIGHT_NODE_COLOR = "#a51c30";
   const HIGHLIGHT_ADJACENT_NODE_COLOR = "#f58025";
@@ -96,6 +92,11 @@ export default function Graph() {
   }
 
   function handleNodeHover(node: any) {
+    if (node) {
+      document.body.style.cursor = "pointer";
+    } else {
+      document.body.style.cursor = "";
+    }
     setHoveredNode(node);
     determineConnectedElements(node);
   }
@@ -112,15 +113,17 @@ export default function Graph() {
     const connectedColor = HIGHLIGHT_ADJACENT_NODE_COLOR;
 
     // Draw the node
+    const nodeRadius = NODE_RADIUS * node.val;
+    const nodeColor = node._type === "person" ? BASE_NODE_COLOR : NODE_2_COLOR;
     ctx.beginPath();
-    ctx.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI, false);
-    ctx.fillStyle = node.color || BASE_NODE_COLOR;
+    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
     ctx.fill();
 
     // Draw border if necessary
     if (node === hoveredNode || connectedNodes.has(node.id)) {
       ctx.beginPath();
-      ctx.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI, false);
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
       ctx.strokeStyle = node === hoveredNode ? highlightColor : connectedColor;
       ctx.lineWidth = BORDER_WIDTH;
       ctx.stroke();
@@ -149,6 +152,8 @@ export default function Graph() {
     ctx.stroke();
   }
 
+  console.log(graphData);
+
   return (
     <section
       className={s.container}
@@ -168,9 +173,14 @@ export default function Graph() {
         linkCanvasObject={(link, ctx, globalScale) =>
           renderLink(link, ctx, globalScale)
         }
-        // nodeCanvasObject={}
-        // enableZoomInteraction={false}
-        // enablePanInteraction={false}
+        linkHoverPrecision={10}
+        // nodeRelSize={5}
+        cooldownTicks={100}
+        onEngineStop={() => {
+          if (!containerRef.current) return;
+          const { width } = containerRef.current.getBoundingClientRect();
+          graphRef.current?.zoomToFit(300, width * 0.05);
+        }}
         graphData={graphData || { nodes: [], links: [] }}
       />
     </section>

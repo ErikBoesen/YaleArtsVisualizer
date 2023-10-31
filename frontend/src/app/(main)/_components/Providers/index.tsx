@@ -7,7 +7,9 @@
 
 "use client";
 
+import { queryClient } from "@/util/query";
 import { PropsWithChildren } from "react";
+import { QueryClientProvider } from "react-query";
 
 /**
  * This client component provides all of the providers we need in the main layout.
@@ -15,5 +17,7 @@ import { PropsWithChildren } from "react";
  * For example, we'll add here the query client for fetching data.
  */
 export default function Providers({ children }: PropsWithChildren) {
-  return <>{children}</>;
+  return (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }

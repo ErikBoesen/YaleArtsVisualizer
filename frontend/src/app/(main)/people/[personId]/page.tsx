@@ -7,6 +7,7 @@
 
 import GraphData from "@/components/Graph/GraphData";
 import { prisma } from "@/util/prisma";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface RouteParams {
@@ -20,7 +21,24 @@ export default async function PersonPage({
 }: RouteParams) {
   try {
     const id = parseInt(personId);
-    var person = await prisma.person.findFirstOrThrow({ where: { id } });
+    var person = await prisma.person.findFirstOrThrow({
+      where: { id },
+      include: {
+        productions: {
+          select: {
+            id: true,
+            role: true,
+            group: true,
+            production: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
   } catch (e) {
     notFound();
   }
@@ -29,7 +47,16 @@ export default async function PersonPage({
     <article>
       PERSON:
       <h1>{person.name}</h1>
-      <GraphData source={`/api/graph/people/${person.id}?depth=3`} />
+      <ul>
+        {person.productions.map(({ id, production }) => (
+          <li key={id}>
+            <Link href={`/productions/${production.id}`}>
+              {production.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <GraphData source={["people", person.id, { depth: "4" }]} />
     </article>
   );
 }

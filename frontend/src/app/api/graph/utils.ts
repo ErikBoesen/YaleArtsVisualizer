@@ -91,12 +91,14 @@ export function parseNodesAndLinks<T extends { _type: string }>(
         toParse.push(...(parsable.productions || []));
         delete parsable["productions"];
         parsable.id = `pers_${parsable.id}`;
+        parsable.val = 1; // this is the size of the node
         nodes[parsable.id] = parsable;
         break;
       case "production":
         toParse.push(...((parsable.persons || []) as unknown as T[]));
         delete parsable["persons"];
         parsable.id = `prod_${parsable.id}`;
+        parsable.val = 2; // this is the size of the node
         nodes[parsable.id] = parsable;
         break;
       case "productionpersonedge":
