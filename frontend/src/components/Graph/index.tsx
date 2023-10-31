@@ -51,6 +51,104 @@ export default function Graph() {
     return () => observer.disconnect();
   }, []);
 
+  /* -------------------------------------------------------------------------- */
+  /*                          For highlighting nodes                         */
+  /* -------------------------------------------------------------------------- */
+
+  // Current colors based on: https://coolors.co/palette/011f5b-003262-0f4d92-2774ae-b9d9eb-faebd7-f58025-a51c30-8c1515-800000
+  const BASE_NODE_COLOR = "#0f4d92";
+  const BASE_LINK_COLOR = "#003262";
+  const HIGHLIGHT_NODE_COLOR = "#a51c30";
+  const HIGHLIGHT_ADJACENT_NODE_COLOR = "#f58025";
+  const HIGHLIGHT_LINK_COLOR = "#8c1515";
+
+  // State to keep track of hovered node
+  const [hoveredNode, setHoveredNode] = useState(null);
+  // State to keep track of connected nodes and links
+  const [connectedNodes, setConnectedNodes] = useState<Set<any>>(new Set());
+  const [connectedLinks, setConnectedLinks] = useState<Set<any>>(new Set());
+
+  function determineConnectedElements(node: any) {
+    if (!graphData) return;
+
+    const nodes = new Set();
+    const links = new Set();
+
+    if (node) {
+      graphData.links.forEach((link: any) => {
+        const sourceId =
+          typeof link.source === "object" ? link.source.id : link.source;
+        const targetId =
+          typeof link.target === "object" ? link.target.id : link.target;
+
+        if (sourceId === node.id) {
+          nodes.add(targetId);
+          links.add(link);
+        } else if (targetId === node.id) {
+          nodes.add(sourceId);
+          links.add(link);
+        }
+      });
+    }
+
+    setConnectedNodes(nodes);
+    setConnectedLinks(links);
+  }
+
+  function handleNodeHover(node: any) {
+    setHoveredNode(node);
+    determineConnectedElements(node);
+  }
+
+  function renderNode(
+    node: any,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number,
+    hoveredNode: any
+  ) {
+    const NODE_RADIUS = 5;
+    const BORDER_WIDTH = 2;
+    const highlightColor = HIGHLIGHT_NODE_COLOR;
+    const connectedColor = HIGHLIGHT_ADJACENT_NODE_COLOR;
+
+    // Draw the node
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI, false);
+    ctx.fillStyle = node.color || BASE_NODE_COLOR;
+    ctx.fill();
+
+    // Draw border if necessary
+    if (node === hoveredNode || connectedNodes.has(node.id)) {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, NODE_RADIUS, 0, 2 * Math.PI, false);
+      ctx.strokeStyle = node === hoveredNode ? highlightColor : connectedColor;
+      ctx.lineWidth = BORDER_WIDTH;
+      ctx.stroke();
+    }
+  }
+
+  function renderLink(
+    link: any,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number
+  ) {
+    const DEFAULT_LINE_WIDTH = 1;
+    const HIGHLIGHT_LINE_WIDTH = 2;
+    const highlightColor = HIGHLIGHT_LINK_COLOR;
+
+    ctx.beginPath();
+    ctx.moveTo(link.source.x, link.source.y);
+    ctx.lineTo(link.target.x, link.target.y);
+    ctx.strokeStyle = connectedLinks.has(link)
+      ? highlightColor
+      : link.color || BASE_LINK_COLOR;
+    ctx.lineWidth = connectedLinks.has(link)
+      ? HIGHLIGHT_LINE_WIDTH
+      : DEFAULT_LINE_WIDTH;
+
+    ctx.stroke();
+  }
+
   return (
     <section
       className={s.container}
@@ -63,6 +161,13 @@ export default function Graph() {
         linkColor="color"
         ref={graphRef}
         {...dimensions}
+        onNodeHover={handleNodeHover}
+        nodeCanvasObject={(node, ctx, globalScale) =>
+          renderNode(node, ctx, globalScale, hoveredNode)
+        }
+        linkCanvasObject={(link, ctx, globalScale) =>
+          renderLink(link, ctx, globalScale)
+        }
         // nodeCanvasObject={}
         // enableZoomInteraction={false}
         // enablePanInteraction={false}
