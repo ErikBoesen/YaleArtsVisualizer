@@ -27,6 +27,7 @@
     inset: auto var(--page-padding) 0;
     height: 1px;
     background-color: theme-color("content");
+    z-index: 1;
 
     @include media("md") {
       inset: var(--page-padding) auto var(--page-padding) 0;

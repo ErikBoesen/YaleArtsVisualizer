@@ -26,6 +26,7 @@
 
   & > header {
     grid-area: header;
+    z-index: zIndex("medium");
   }
 
   & > main {

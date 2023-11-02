@@ -53,7 +53,7 @@ export default async function ProductionPage({
           <Link href={`/people/${person.id}`}>{person.name}</Link>
         </li>
       ))}
-      <GraphData source={["productions", production.id, { depth: "4" }]} />
+      <GraphData source={["productions", production.id, { depth: "3" }]} />
     </article>
   );
 }
