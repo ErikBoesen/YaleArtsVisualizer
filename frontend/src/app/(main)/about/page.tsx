@@ -21,7 +21,7 @@ export default function AboutPage() {
             Yale arts community, including theater, film, and journalism. It
             displays the network of collaborations and projects, offers insights
             into clusters of collaborators, and includes advanced features to
-            uncover relationships within the university's vibrant artistic
+            uncover relationships within the university&apos;s vibrant artistic
             landscape.
           </p>
         </section>
