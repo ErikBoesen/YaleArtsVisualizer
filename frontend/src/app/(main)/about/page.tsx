@@ -4,13 +4,12 @@
  * Created on: Fri Oct 27 2023
  * 2023 Yale SWE
  */
-import GraphData from '@/components/Graph/GraphData';
+import GraphData from "@/components/Graph/GraphData";
 
 export default function AboutPage() {
-
   return (
     <main>
-      <GraphData source="/ydn_graph.json" />
+      {/* <GraphData source="/ydn_graph.json" /> */}
       <p>
         Eu facilisis sed odio morbi quis commodo odio. Iaculis nunc sed augue
         lacus viverra vitae congue eu consequat. Cursus euismod quis viverra

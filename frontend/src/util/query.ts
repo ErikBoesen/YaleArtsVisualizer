@@ -28,6 +28,10 @@ export function useGraphQuery(...args: NodeQueryKey) {
     keepPreviousData: true,
     queryFn: async ({ queryKey }) => {
       const [nodeType, nodeId, nodeOptions] = queryKey;
+      if (nodeType === "static") {
+        /// Do something here
+        return { nodes: [], links: [] };
+      }
       let fetchUrl = `/api/graph/${nodeType}`;
       if (nodeId) fetchUrl += `/${nodeId}`;
       if (nodeOptions) {

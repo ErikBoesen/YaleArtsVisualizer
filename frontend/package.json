@@ -11,8 +11,8 @@
     "postbuild": "next-sitemap --config next-sitemap.config.js",
     "prisma:seed": "dotenv -e .env.local -- yarn prisma db seed",
     "prisma:studio": "dotenv -e .env.local -- yarn prisma studio",
-    "prisma:generate": "dotenv -e .env.local -- yarn prisma generate --generator client --no-engine --data-proxy",
-    "prisma:generatepy": "dotenv -e .env.local -- prisma generate --generator scraper --no-engine --data-proxy"
+    "prisma:generate": "dotenv -e .env.local -- yarn prisma generate --generator client --no-engine",
+    "prisma:generatepy": "dotenv -e .env.local -- prisma generate --generator scraper --no-engine"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

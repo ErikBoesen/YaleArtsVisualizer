@@ -30,7 +30,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
   // Fetch the data from the graph
   const select = generateSelectStatement(table, depth);
-  const result = await prisma[table].findFirst({
+  const result = await (prisma[table] as any).findFirst({
     where: { id: parseInt(nodeId) },
     select,
   });
