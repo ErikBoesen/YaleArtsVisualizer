@@ -1,0 +1,114 @@
+/*
+ * About.module.scss
+ * Authors: Misho Gabashvili
+ * Created on: Fri Nov 3 2023
+ * 2023 Yale SWE
+ */
+
+@import "@/styles/settings/type";
+@import "@/styles/utils";
+
+.aboutPageContainer {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0 auto;
+
+  h1 {
+    position: absolute;
+    font-size: 2.3rem;
+    color: theme-color("content");
+    font-weight: bold;
+  }
+}
+
+.descriptionContainer {
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0 auto;
+}
+
+.aboutArtsMap {
+  position: relative;
+  flex-basis: 60%;
+  margin-top: 60px;
+  p {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: theme-color("content");
+  }
+}
+
+.crewSection {
+  position: relative;
+  flex-basis: 35%;
+  margin-left: 5%;
+  margin-top: 60px;
+
+  h2 {
+    font-size: 1rem;
+    color: theme-color("content");
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    font-size: 1rem;
+    line-height: 1.2;
+    color: theme-color("content");
+    position: relative;
+    padding-right: 30px;
+    margin-bottom: 10px;
+
+    &::after {
+      content: "○";
+      position: absolute;
+      left: 85%;
+      top: 0;
+      padding-left: 10px;
+      white-space: nowrap;
+    }
+  }
+}
+
+.explore {
+  & h2 {
+    position: relative;
+    padding: 0.5em 0;
+    font-weight: 700;
+    margin-bottom: 0.5em;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      top: unset;
+      height: 1px;
+      background-color: theme-color("content");
+
+      @include media("md") {
+        width: calc(100% + 2 * var(--page-padding));
+      }
+    }
+  }
+
+  & li {
+    font-size: 2em;
+    font-style: italic;
+    padding: 0.05em 0;
+    &::after {
+      content: "→";
+      position: absolute;
+      right: 0;
+    }
+  }
+}
