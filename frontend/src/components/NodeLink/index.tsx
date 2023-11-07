@@ -36,7 +36,9 @@ export default function NodeLink({
       prefetch={false}
       className={`${props.className} ${s.node_link}`}
       onMouseEnter={() => setHoveredNode(nodeGraphId)}
+      onFocus={() => setHoveredNode(nodeGraphId)}
       onMouseLeave={() => setHoveredNode(undefined)}
+      onBlur={() => setHoveredNode(undefined)}
       data-node-type={nodeType}
     >
       {children}

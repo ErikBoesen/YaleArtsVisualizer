@@ -41,6 +41,10 @@ export function useGraphQuery(...args: NodeQueryKey) {
       }
       let fetchUrl = `/api/graph/${nodeType}`;
       if (nodeId) fetchUrl += `/${nodeId}`;
+      // TODO: Add filtering so we can reliably fetch / search all nodes.
+      else {
+        return { nodes: [], links: [] };
+      }
       if (nodeOptions) {
         fetchUrl += `?${new URLSearchParams(nodeOptions).toString()}`;
       }

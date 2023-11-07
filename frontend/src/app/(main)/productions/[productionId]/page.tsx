@@ -108,7 +108,7 @@ export default async function ProductionPage({
         </table>
       </section>
       <GraphData
-        source={["productions", production.id, { depth: "2" }]}
+        source={["productions", production.id, { depth: "3" }]}
         anchoredNodeId={`prod_${production.id}`}
       />
     </article>

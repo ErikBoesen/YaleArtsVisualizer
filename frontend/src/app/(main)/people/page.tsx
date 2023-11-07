@@ -5,6 +5,7 @@
  * 2023 Yale SWE
  */
 import GraphData from "@/components/Graph/GraphData";
+import NodeLink from "@/components/NodeLink";
 import { prisma } from "@/util/prisma";
 import Link from "next/link";
 
@@ -19,7 +20,9 @@ export default async function PeoplePage() {
       <ul>
         {people.map((person) => (
           <li key={person.id}>
-            <Link href={`/people/${person.id}`}>{person.name}</Link>
+            <NodeLink nodeType="person" nodeId={person.id}>
+              {person.name}
+            </NodeLink>
           </li>
         ))}
       </ul>
