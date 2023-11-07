@@ -11,6 +11,7 @@
     "postbuild": "next-sitemap --config next-sitemap.config.js",
     "prisma:seed": "dotenv -e .env.local -- yarn prisma db seed",
     "prisma:studio": "dotenv -e .env.local -- yarn prisma studio",
+    "prisma:dbpush": "dotenv -e .env.local -- yarn prisma db push",
     "prisma:generate": "dotenv -e .env.local -- yarn prisma generate --generator client --no-engine",
     "prisma:generatepy": "dotenv -e .env.local -- prisma generate --generator scraper --no-engine"
   },
@@ -30,6 +31,7 @@
     "react-force-graph-2d": "^1.25.2",
     "react-icons": "^4.11.0",
     "react-query": "^3.39.3",
+    "react-wrap-balancer": "^1.1.0",
     "transition-hook": "^1.5.2"
   },
   "devDependencies": {

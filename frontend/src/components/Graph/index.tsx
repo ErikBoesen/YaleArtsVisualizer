@@ -46,6 +46,16 @@ export default function Graph() {
     return () => observer.disconnect();
   }, []);
 
+  // Focus the graph after new data loads
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!containerRef.current) return;
+      const { width } = containerRef.current.getBoundingClientRect();
+      graphRef.current?.zoomToFit(300, width * 0.05);
+    }, 1000);
+    return () => window.clearTimeout(timeout);
+  }, [graphData]);
+
   /* -------------------------------------------------------------------------- */
   /*                          For highlighting nodes                         */
   /* -------------------------------------------------------------------------- */
@@ -172,13 +182,19 @@ export default function Graph() {
           renderLink(link, ctx, globalScale)
         }
         linkHoverPrecision={10}
+        // {...(focused
+        //   ? {}
+        //   : {
+        //       cooldownTicks: 100,
+        //       onEngineStop: () => {
+        //         if (!containerRef.current) return;
+        //         const { width } = containerRef.current.getBoundingClientRect();
+        //         graphRef.current?.zoomToFit(300, width * 0.05);
+        //         setFocused(true);
+        //       },
+        //     })}
         // nodeRelSize={5}
-        // cooldownTicks={100}
-        // onEngineStop={() => {
-        //   if (!containerRef.current) return;
-        //   const { width } = containerRef.current.getBoundingClientRect();
-        //   graphRef.current?.zoomToFit(300, width * 0.05);
-        // }}
+
         graphData={graphData || { nodes: [], links: [] }}
       />
     </section>

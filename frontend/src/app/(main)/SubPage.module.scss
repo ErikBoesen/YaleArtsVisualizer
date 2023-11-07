@@ -1,0 +1,94 @@
+/*
+ * SubPage.module.scss
+ * Author: evan kirkiles
+ * Created on: Tue Nov 07 2023
+ * 2023 Yale SWE 
+ */
+
+.container {
+  display: grid;
+  min-height: 100%;
+  grid-template:
+    "header header" auto
+    "description description" 1fr
+    "cast cast" auto / 1fr auto;
+  gap: 0.5em;
+
+  & h1 {
+    font-weight: 700;
+    font-size: 2em;
+    line-height: 1;
+
+    & span::after {
+      content: "";
+      border: 7px solid #db5252;
+      border-radius: 100%;
+      display: inline-block;
+      height: 0.5em;
+      width: 0.5em;
+      margin-left: 0.25em;
+      vertical-align: baseline;
+    }
+  }
+
+  & hgroup {
+    grid-area: header;
+    & a {
+      opacity: 0.5;
+      display: block;
+    }
+  }
+
+  & table {
+    width: 100%;
+  }
+
+  & h2 {
+    font-weight: 700;
+    font-size: 1.25em;
+    margin-bottom: 0.03em;
+  }
+
+  & pre {
+    grid-area: description;
+    white-space: pre-wrap;
+    width: 100%;
+  }
+
+  & section {
+    grid-area: cast;
+  }
+
+  & li {
+    margin-bottom: 0.25em;
+  }
+}
+
+@keyframes scale-right {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale1(0);
+  }
+}
+
+.group_label {
+  font-size: 1.1em;
+  font-weight: 700;
+  padding: 0.5em 0;
+  position: relative;
+
+  &::after {
+    position: absolute;
+    content: "";
+    inset: auto 0 0.25em 0;
+    height: 1px;
+    background-color: currentColor;
+    transform-origin: 0% 50%;
+    animation: scale-right 1s ease-in-out;
+    width: calc(100% + var(--page-padding) * 2);
+  }
+}

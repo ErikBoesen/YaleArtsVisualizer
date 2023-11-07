@@ -33,9 +33,9 @@ def parse_production(production_url: str, page_soup: BeautifulSoup):
         "href": ROOT + production_url,
     }
 
-    # Parse: Title
+    # 1: Title
     production["name"] = soup.find("h1").text.strip()
-    # Parse: Date
+    # 2: Date
     date_section = soup.find("div", {"class": "group-performance-date-"})
     if date_section is None:
         print("No date was found for this production.")
@@ -59,7 +59,17 @@ def parse_production(production_url: str, page_soup: BeautifulSoup):
             # production["open_date"] = dates[0]
             # production["close_date"] = dates[-1]
             production["date"] = dates[0]
-    # TODO: Parse: Description
+    # 3: Description
+    description = soup.find("div", {"class": "field-name-body"})
+    if description:
+        production["description"] = description.get_text("\n")
+    # 4. Poster
+    poster = soup.find("div", {"class": "field-name-field-poster"}).find("a")
+    if poster:
+        production["imageHref"] = poster["href"]
+        posterImg = poster.find("img")
+        if posterImg:
+            production["imageAlt"] = posterImg["alt"]
 
     return production
 

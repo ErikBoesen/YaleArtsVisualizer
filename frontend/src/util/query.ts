@@ -20,7 +20,13 @@ export type NodeQueryKey =
   | [NodeEndpoint, NodeFetchId | undefined, NodeFetchOptions]
   | ["static", string];
 
-export const queryClient = new QueryClient({});
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export function useGraphQuery(...args: NodeQueryKey) {
   return useQuery<GraphData, unknown, GraphData, NodeQueryKey>({

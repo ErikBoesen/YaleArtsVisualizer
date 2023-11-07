@@ -7,7 +7,7 @@
  * Reset styles to nullify per-platform User-Agent stylings on HTML
  * elements. These make all elements function almost essentially as divs.
  */
-@import '@/styles/settings/type';
+@import "@/styles/settings/type";
 
 html {
   -ms-text-size-adjust: 100%;
@@ -207,11 +207,11 @@ textarea {
 
 /* These elements are usually rendered a certain way by the browser */
 button,
-input[type='reset'],
-input[type='button'],
-input[type='submit'],
-input[type='checkbox'],
-input[type='radio'],
+input[type="reset"],
+input[type="button"],
+input[type="submit"],
+input[type="checkbox"],
+input[type="radio"],
 select {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -248,12 +248,28 @@ td {
   text-align: left;
 }
 
-th,
-td {
-  display: inline;
+table {
+  display: table;
 }
 
-input[type='search'] {
+thead {
+  display: table-header-group;
+}
+
+tbody {
+  display: table-row-group;
+}
+
+tr {
+  display: table-row;
+}
+
+th,
+td {
+  display: table-cell;
+}
+
+input[type="search"] {
   -webkit-appearance: none;
   appearance: none;
 }

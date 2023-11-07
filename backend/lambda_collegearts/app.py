@@ -2,6 +2,7 @@ import logging
 import sys
 import os
 import json
+import datetime
 from prisma import Prisma
 from aws_lambda_typing import context as context_
 
@@ -80,7 +81,7 @@ def handler(event, context: context_.Context):
             # Not sure if that's something we need to worry about either.
             # 1. Upsert the production
             production_final = db.production.upsert(
-                data={"create": production, "update": {}},
+                data={"create": production, "update": production},
                 where={
                     "slug_organizationId": {
                         "organizationId": ORGANIZATION_ID,
@@ -91,12 +92,12 @@ def handler(event, context: context_.Context):
 
             # 2. Upsert people sequentially (same transaction), get response
             transacted_people_ids: dict[str, int] = {}
-            with db.tx(timeout=10000) as transaction:
+            with db.tx(timeout=datetime.timedelta(seconds=10)) as transaction:
                 for person, _ in people_edge_pairs:
                     slugName = person["slugName"]
                     year = person.get("year", 0)
                     person_final = transaction.person.upsert(
-                        data={"create": person, "update": {}},
+                        data={"create": person, "update": person},
                         where={
                             "slugName_year": {
                                 "slugName": slugName,
@@ -120,7 +121,11 @@ def handler(event, context: context_.Context):
                                 "production": {"connect": {"id": production_id}},
                                 "person": {"connect": {"id": person_id}},
                             },
-                            "update": {},
+                            "update": {
+                                **edge,
+                                "production": {"connect": {"id": production_id}},
+                                "person": {"connect": {"id": person_id}},
+                            },
                         },
                         where={
                             "productionId_personId_role": {

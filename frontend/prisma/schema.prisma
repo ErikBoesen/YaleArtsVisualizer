@@ -9,7 +9,7 @@
 datasource db {
   provider = "mysql"
   url = env("DATABASE_URL")
-  // directUrl = env("DATABASE_URL_DIRECT")
+  directUrl = env("DATABASE_URL_DIRECT")
   relationMode = "prisma"
 }
 
@@ -51,6 +51,7 @@ model Production {
   date            DateTime? @db.Date
   href            String    @db.VarChar(255)
   imageHref       String?   @db.VarChar(255)
+  imageAlt        String?   @db.VarChar(255)
   description     String?   @db.MediumText()
 
   // Constraints, unique production per org id / slug

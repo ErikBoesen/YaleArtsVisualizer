@@ -10,6 +10,7 @@
 import { queryClient } from "@/util/query";
 import { PropsWithChildren } from "react";
 import { QueryClientProvider } from "react-query";
+import { Provider as WrapBalancerProvider } from "react-wrap-balancer";
 
 /**
  * This client component provides all of the providers we need in the main layout.
@@ -18,6 +19,8 @@ import { QueryClientProvider } from "react-query";
  */
 export default function Providers({ children }: PropsWithChildren) {
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <WrapBalancerProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WrapBalancerProvider>
   );
 }

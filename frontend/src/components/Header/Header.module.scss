@@ -18,6 +18,14 @@
   top: 0;
   background-color: theme-color("background");
 
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 100% var(--page-padding) auto;
+    height: 1em;
+    background: linear-gradient(theme-color("background"), transparent);
+  }
+
   &::after {
     content: "";
     position: absolute;
