@@ -4,6 +4,18 @@
  * Created on: Tue Nov 07 2023
  * 2023 Yale SWE 
  */
+@import "@/styles/utils";
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
 
 .container {
   display: grid;
@@ -13,22 +25,23 @@
     "description description" 1fr
     "cast cast" auto / 1fr auto;
   gap: 0.5em;
+  animation: fade-up 0.3s ease-in-out;
 
   & h1 {
     font-weight: 700;
     font-size: 2em;
     line-height: 1;
 
-    & span::after {
-      content: "";
-      border: 7px solid #db5252;
-      border-radius: 100%;
-      display: inline-block;
-      height: 0.5em;
-      width: 0.5em;
-      margin-left: 0.25em;
-      vertical-align: baseline;
-    }
+    // & span::after {
+    //   content: "";
+    //   border: 7px solid #db5252;
+    //   border-radius: 100%;
+    //   display: inline-block;
+    //   height: 0.5em;
+    //   width: 0.5em;
+    //   margin-left: 0.25em;
+    //   vertical-align: baseline;
+    // }
   }
 
   & hgroup {
@@ -41,6 +54,10 @@
 
   & table {
     width: 100%;
+
+    & td {
+      width: 50%;
+    }
   }
 
   & h2 {
@@ -88,7 +105,10 @@
     height: 1px;
     background-color: currentColor;
     transform-origin: 0% 50%;
-    animation: scale-right 1s ease-in-out;
-    width: calc(100% + var(--page-padding) * 2);
+    // animation: scale-right 1s ease-in-out;
+
+    @include media("md") {
+      // width: calc(100% + var(--page-padding) * 2);
+    }
   }
 }

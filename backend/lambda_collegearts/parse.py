@@ -62,7 +62,7 @@ def parse_production(production_url: str, page_soup: BeautifulSoup):
     # 3: Description
     description = soup.find("div", {"class": "field-name-body"})
     if description:
-        production["description"] = description.get_text("\n")
+        production["description"] = description.get_text()
     # 4. Poster
     poster = soup.find("div", {"class": "field-name-field-poster"}).find("a")
     if poster:
@@ -71,6 +71,7 @@ def parse_production(production_url: str, page_soup: BeautifulSoup):
         if posterImg:
             production["imageAlt"] = posterImg["alt"]
 
+    print(production)
     return production
 
 

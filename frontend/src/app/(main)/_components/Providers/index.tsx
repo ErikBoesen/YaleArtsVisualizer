@@ -8,7 +8,8 @@
 "use client";
 
 import { queryClient } from "@/util/query";
-import { PropsWithChildren } from "react";
+import { usePathname } from "next/navigation";
+import { PropsWithChildren, useEffect } from "react";
 import { QueryClientProvider } from "react-query";
 import { Provider as WrapBalancerProvider } from "react-wrap-balancer";
 
@@ -18,6 +19,11 @@ import { Provider as WrapBalancerProvider } from "react-wrap-balancer";
  * For example, we'll add here the query client for fetching data.
  */
 export default function Providers({ children }: PropsWithChildren) {
+  const pathname = usePathname();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
+
   return (
     <WrapBalancerProvider>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

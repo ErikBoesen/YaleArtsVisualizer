@@ -1,0 +1,37 @@
+/*
+ * NodeLink.module.scss
+ * Author: evan kirkiles
+ * Created on: Tue Nov 07 2023
+ * 2023 Yale SWE 
+ */
+
+@mixin border-circle($color) {
+  content: "";
+  border: 0.15em solid $color;
+  border-radius: 100%;
+  display: inline-block;
+  height: 0.75em;
+  width: 0.75em;
+  margin-left: 0.25em;
+  vertical-align: baseline;
+  box-sizing: border-box;
+}
+
+.node_link {
+  &:not(:has(span)) {
+    &[data-node-type="production"]::after {
+      @include border-circle(#db5252);
+    }
+    &[data-node-type="person"]::after {
+      @include border-circle(#ffffff);
+    }
+  }
+
+  &[data-node-type="production"] > span::after {
+    @include border-circle(#db5252);
+  }
+
+  &[data-node-type="person"] > span::after {
+    @include border-circle(#ffffff);
+  }
+}

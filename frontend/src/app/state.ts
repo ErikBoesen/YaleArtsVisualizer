@@ -11,4 +11,5 @@ import { NodeQueryKey } from "@/util/query";
 import { atom } from "jotai";
 
 export const dataSourceAtom = atom<NodeQueryKey>(["static", "home"]);
-export const selectedNodeAtom = atom("");
+export const anchoredNodeAtom = atom<string | undefined>(undefined);
+export const hoveredNodeAtom = atom<string | undefined>(undefined);

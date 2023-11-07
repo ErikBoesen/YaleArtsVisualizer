@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import s from "../../SubPage.module.scss";
 import { Fragment } from "react";
 import Balancer from "react-wrap-balancer";
+import NodeLink from "@/components/NodeLink";
 
 interface RouteParams {
   params: {
@@ -64,7 +65,13 @@ export default async function ProductionPage({
     <article className={s.container}>
       <hgroup>
         <h1>
-          <Balancer>{production.name}</Balancer>
+          <NodeLink
+            nodeType="production"
+            nodeId={production.id}
+            style={{ opacity: 1 }}
+          >
+            <Balancer>{production.name}</Balancer>
+          </NodeLink>
         </h1>
 
         <a href={production.href} target="_blank" rel="noopener noreferrer">
@@ -75,38 +82,35 @@ export default async function ProductionPage({
       <section>
         <h2>Cast</h2>
         <table>
-          <thead>
-            {/* <tr>
-              <th>Role</th>
-              <th>Person</th>
-            </tr> */}
-          </thead>
+          {/* <thead>
+          </thead> */}
           <tbody>
             {groups.map(([group, edges], index) => (
               <Fragment key={group}>
-                {/* {group !== "" && <h3>{group}</h3>} */}
                 <tr>
                   <td className={s.group_label} colSpan={2}>
                     {group}
                   </td>
                 </tr>
-                {/* <ul> */}
                 {edges.map(({ id, person, role }) => (
                   <tr key={id}>
-                    <td>{role}</td>
                     <td>
-                      <Link href={`/people/${person.id}`}>{person.name}</Link>
+                      <NodeLink nodeType="person" nodeId={person.id}>
+                        {person.name}
+                      </NodeLink>
                     </td>
-                    {/* <br /> */}
+                    <td>{role}</td>
                   </tr>
                 ))}
-                {/* </ul> */}
               </Fragment>
             ))}
           </tbody>
         </table>
       </section>
-      <GraphData source={["productions", production.id, { depth: "3" }]} />
+      <GraphData
+        source={["productions", production.id, { depth: "2" }]}
+        anchoredNodeId={`prod_${production.id}`}
+      />
     </article>
   );
 }

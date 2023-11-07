@@ -1,17 +1,22 @@
 "use client";
 
-import { useHydrateAtoms } from "jotai/utils";
-import { dataSourceAtom } from "@/app/state";
+import { anchoredNodeAtom, dataSourceAtom } from "@/app/state";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { NodeQueryKey } from "@/util/query";
 
-function GraphData({ source }: { source: NodeQueryKey }) {
+interface GraphDataProps {
+  source: NodeQueryKey;
+  anchoredNodeId?: string;
+}
+
+function GraphData({ source, anchoredNodeId }: GraphDataProps) {
+  const setAnchoredNode = useSetAtom(anchoredNodeAtom);
   const setDataSource = useSetAtom(dataSourceAtom);
   useEffect(() => {
     setDataSource(source);
-  }, [setDataSource, source]);
-  // useHydrateAtoms([[dataSourceAtom, source]]);
+    setAnchoredNode(anchoredNodeId);
+  }, [setDataSource, setAnchoredNode, source, anchoredNodeId]);
   return <></>;
 }
 

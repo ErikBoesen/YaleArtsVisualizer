@@ -10,9 +10,10 @@ import { useEffect, useRef, useState } from "react";
 import s from "./Graph.module.scss";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { debounce } from "debounce";
-import { useAtomValue } from "jotai";
-import { dataSourceAtom } from "@/app/state";
+import { useAtom, useAtomValue } from "jotai";
+import { anchoredNodeAtom, dataSourceAtom, hoveredNodeAtom } from "@/app/state";
 import { useGraphQuery } from "@/util/query";
+import { useRouter } from "next/navigation";
 
 interface Dimensions {
   width?: number;
@@ -25,6 +26,9 @@ interface Dimensions {
  * data in the commonly-shared top-level graph (on pages where it is relevant).
  */
 export default function Graph() {
+  // router for manually going to diff pages
+  const router = useRouter();
+
   // fetch data for existing query
   const dataPath = useAtomValue(dataSourceAtom);
   const { data: graphData, isLoading } = useGraphQuery(...dataPath);
@@ -46,7 +50,14 @@ export default function Graph() {
     return () => observer.disconnect();
   }, []);
 
-  // Focus the graph after new data loads
+  // When dimensions change, re-focus the data
+  useEffect(() => {
+    const { width } = dimensions;
+    if (!width) return;
+    graphRef.current?.zoomToFit(300, width * 0.05);
+  }, [dimensions]);
+
+  // Also focus the graph after new data loads
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (!containerRef.current) return;
@@ -55,6 +66,41 @@ export default function Graph() {
     }, 1000);
     return () => window.clearTimeout(timeout);
   }, [graphData]);
+
+  // When anchored node changes, update its position in the nodes array
+  const [anchoredNodeId, setAnchoredNode] = useAtom(anchoredNodeAtom);
+  const anchorConnects = useRef({ nodes: new Set(), links: new Set() });
+  useEffect(() => {
+    if (!graphData) return;
+    graphData.nodes.forEach((node) => {
+      if (node.id === anchoredNodeId) {
+        node.fx = node.x;
+        node.fy = node.y;
+        graphRef.current?.centerAt(node.x, node.y, 300);
+      } else {
+        node.fx = undefined;
+        node.fy = undefined;
+      }
+    });
+    const { nodes, links } = anchorConnects.current;
+    nodes.clear();
+    links.clear();
+    if (anchoredNodeId) {
+      graphData.links.forEach((link) => {
+        const sourceId =
+          typeof link.source === "object" ? link.source.id : link.source;
+        const targetId =
+          typeof link.target === "object" ? link.target.id : link.target;
+        if (sourceId === anchoredNodeId) {
+          nodes.add(targetId);
+          links.add(link.id);
+        } else if (targetId === anchoredNodeId) {
+          nodes.add(sourceId);
+          links.add(link.id);
+        }
+      });
+    }
+  }, [anchoredNodeId, graphData]);
 
   /* -------------------------------------------------------------------------- */
   /*                          For highlighting nodes                         */
@@ -65,57 +111,39 @@ export default function Graph() {
   const NODE_2_COLOR = "#ffffff";
   const BASE_LINK_COLOR = "#003262";
   const HIGHLIGHT_NODE_COLOR = "#a51c30";
-  const HIGHLIGHT_ADJACENT_NODE_COLOR = "#f58025";
+  const HIGHLIGHT_ADJACENT_NODE_COLOR = "#DB5252";
   const HIGHLIGHT_LINK_COLOR = "#8c1515";
 
   // State to keep track of hovered node
-  const [hoveredNode, setHoveredNode] = useState(null);
-  // State to keep track of connected nodes and links
-  const [connectedNodes, setConnectedNodes] = useState<Set<any>>(new Set());
-  const [connectedLinks, setConnectedLinks] = useState<Set<any>>(new Set());
-
-  function determineConnectedElements(node: any) {
+  const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeAtom);
+  const connections = useRef({ nodes: new Set(), links: new Set() });
+  // update connections ref every time graphdata or hovered node changes
+  useEffect(() => {
     if (!graphData) return;
-
-    const nodes = new Set();
-    const links = new Set();
-
-    if (node) {
-      graphData.links.forEach((link: any) => {
+    const { nodes, links } = connections.current;
+    nodes.clear();
+    links.clear();
+    if (hoveredNodeId) {
+      graphData.links.forEach((link) => {
         const sourceId =
           typeof link.source === "object" ? link.source.id : link.source;
         const targetId =
           typeof link.target === "object" ? link.target.id : link.target;
-
-        if (sourceId === node.id) {
+        if (sourceId === hoveredNodeId) {
           nodes.add(targetId);
-          links.add(link);
-        } else if (targetId === node.id) {
+          links.add(link.id);
+        } else if (targetId === hoveredNodeId) {
           nodes.add(sourceId);
-          links.add(link);
+          links.add(link.id);
         }
       });
     }
-
-    setConnectedNodes(nodes);
-    setConnectedLinks(links);
-  }
-
-  function handleNodeHover(node: any) {
-    if (node) {
-      document.body.style.cursor = "pointer";
-    } else {
-      document.body.style.cursor = "";
-    }
-    setHoveredNode(node);
-    determineConnectedElements(node);
-  }
+  }, [hoveredNodeId, graphData]);
 
   function renderNode(
     node: any,
     ctx: CanvasRenderingContext2D,
-    globalScale: number,
-    hoveredNode: any
+    globalScale: number
   ) {
     const NODE_RADIUS = 5;
     const BORDER_WIDTH = 2;
@@ -131,10 +159,18 @@ export default function Graph() {
     ctx.fill();
 
     // Draw border if necessary
-    if (node === hoveredNode || connectedNodes.has(node.id)) {
+    if (
+      node.id === hoveredNodeId ||
+      node.id === anchoredNodeId ||
+      connections.current.nodes.has(node.id) ||
+      anchorConnects.current.nodes.has(node.id)
+    ) {
       ctx.beginPath();
       ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-      ctx.strokeStyle = node === hoveredNode ? highlightColor : connectedColor;
+      ctx.strokeStyle =
+        node.id === hoveredNodeId || node.id === anchoredNodeId
+          ? highlightColor
+          : connectedColor;
       ctx.lineWidth = BORDER_WIDTH;
       ctx.stroke();
     }
@@ -152,12 +188,13 @@ export default function Graph() {
     ctx.beginPath();
     ctx.moveTo(link.source.x, link.source.y);
     ctx.lineTo(link.target.x, link.target.y);
-    ctx.strokeStyle = connectedLinks.has(link)
+    const isConnected =
+      connections.current.links.has(link.id) ||
+      anchorConnects.current.links.has(link.id);
+    ctx.strokeStyle = isConnected
       ? highlightColor
       : link.color || BASE_LINK_COLOR;
-    ctx.lineWidth = connectedLinks.has(link)
-      ? HIGHLIGHT_LINE_WIDTH
-      : DEFAULT_LINE_WIDTH;
+    ctx.lineWidth = isConnected ? HIGHLIGHT_LINE_WIDTH : DEFAULT_LINE_WIDTH;
 
     ctx.stroke();
   }
@@ -174,27 +211,26 @@ export default function Graph() {
         linkColor="color"
         ref={graphRef}
         {...dimensions}
-        onNodeHover={handleNodeHover}
+        onNodeHover={(node) => {
+          document.body.style.cursor = node ? "pointer" : "";
+          setHoveredNodeId(node?.id);
+        }}
         nodeCanvasObject={(node, ctx, globalScale) =>
-          renderNode(node, ctx, globalScale, hoveredNode)
+          renderNode(node, ctx, globalScale)
         }
         linkCanvasObject={(link, ctx, globalScale) =>
           renderLink(link, ctx, globalScale)
         }
+        onNodeClick={(node) => {
+          setAnchoredNode(node.id);
+          const nodePath =
+            node._type === "production" ? "productions" : "people";
+          const nodeId = (node.id as string)
+            .replace("prod_", "")
+            .replace("pers_", "");
+          router.push(`/${nodePath}/${nodeId}`);
+        }}
         linkHoverPrecision={10}
-        // {...(focused
-        //   ? {}
-        //   : {
-        //       cooldownTicks: 100,
-        //       onEngineStop: () => {
-        //         if (!containerRef.current) return;
-        //         const { width } = containerRef.current.getBoundingClientRect();
-        //         graphRef.current?.zoomToFit(300, width * 0.05);
-        //         setFocused(true);
-        //       },
-        //     })}
-        // nodeRelSize={5}
-
         graphData={graphData || { nodes: [], links: [] }}
       />
     </section>

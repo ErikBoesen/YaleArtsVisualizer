@@ -29,6 +29,76 @@ MAX_PRODUCTION_PAGES = 10
 # ---------------------------------------------------------------------------- #
 
 
+def handle_production_page(db: Prisma, production_url: str):
+    production_page = download_production_page(production_url)
+    production = parse_production(production_url, production_page)
+    people_edge_pairs = parse_people_and_edges(production_page)
+    # Return early if no people in the production
+    if len(people_edge_pairs) == 0:
+        return 0
+
+    # !!! IMPORTANT: We don't do diff-based deletions at this point!
+    # Not sure if that's something we need to worry about either.
+    # 1. Upsert the production
+    production_final = db.production.upsert(
+        data={"create": production, "update": production},
+        where={
+            "slug_organizationId": {
+                "organizationId": ORGANIZATION_ID,
+                "slug": production["slug"],
+            }
+        },
+    )
+
+    # 2. Upsert people sequentially (same transaction), get response
+    transacted_people_ids: dict[str, int] = {}
+    with db.tx(timeout=datetime.timedelta(seconds=10)) as transaction:
+        for person, _ in people_edge_pairs:
+            slugName = person["slugName"]
+            year = person.get("year", 0)
+            person_final = transaction.person.upsert(
+                data={"create": person, "update": person},
+                where={
+                    "slugName_year": {
+                        "slugName": slugName,
+                        "year": year,
+                    }
+                },
+            )
+            transacted_people_ids[f"{slugName}_{year}"] = person_final.id
+
+    # 3. Upsert all of the edges using person + production IDs
+    with db.batch_() as batch:
+        for person, edge in people_edge_pairs:
+            production_id = production_final.id
+            slugName = person["slugName"]
+            year = person.get("year", 0)
+            person_id = transacted_people_ids[f"{slugName}_{year}"]
+            batch.productionpersonedge.upsert(
+                data={
+                    "create": {
+                        **edge,
+                        "production": {"connect": {"id": production_id}},
+                        "person": {"connect": {"id": person_id}},
+                    },
+                    "update": {
+                        **edge,
+                        "production": {"connect": {"id": production_id}},
+                        "person": {"connect": {"id": person_id}},
+                    },
+                },
+                where={
+                    "productionId_personId_role": {
+                        "productionId": production_id,
+                        "personId": person_id,
+                        "role": edge.get("role", "n"),
+                    }
+                },
+            )
+
+    return len(people_edge_pairs)
+
+
 def handler(event, context: context_.Context):
     # Open a Prisma connection
     db = Prisma()
@@ -69,76 +139,12 @@ def handler(event, context: context_.Context):
                     f"CACHED: {production_url} ({cache['scraped_pages'][production_url]} links)"
                 )
                 continue
-            production_page = download_production_page(production_url)
-            production = parse_production(production_url, production_page)
-            people_edge_pairs = parse_people_and_edges(production_page)
-            if len(people_edge_pairs) == 0:
-                # Add the scraped page to the cache
-                cache["scraped_pages"][production_url] = 0
-                continue
 
-            # !!! IMPORTANT: We don't do diff-based deletions at this point!
-            # Not sure if that's something we need to worry about either.
-            # 1. Upsert the production
-            production_final = db.production.upsert(
-                data={"create": production, "update": production},
-                where={
-                    "slug_organizationId": {
-                        "organizationId": ORGANIZATION_ID,
-                        "slug": production["slug"],
-                    }
-                },
-            )
+            # Call the production page handler
+            num_people_edge_pairs = handle_production_page(db, production_url)
 
-            # 2. Upsert people sequentially (same transaction), get response
-            transacted_people_ids: dict[str, int] = {}
-            with db.tx(timeout=datetime.timedelta(seconds=10)) as transaction:
-                for person, _ in people_edge_pairs:
-                    slugName = person["slugName"]
-                    year = person.get("year", 0)
-                    person_final = transaction.person.upsert(
-                        data={"create": person, "update": person},
-                        where={
-                            "slugName_year": {
-                                "slugName": slugName,
-                                "year": year,
-                            }
-                        },
-                    )
-                    transacted_people_ids[f"{slugName}_{year}"] = person_final.id
-
-            # 3. Upsert all of the edges using person + production IDs
-            with db.batch_() as batch:
-                for person, edge in people_edge_pairs:
-                    production_id = production_final.id
-                    slugName = person["slugName"]
-                    year = person.get("year", 0)
-                    person_id = transacted_people_ids[f"{slugName}_{year}"]
-                    batch.productionpersonedge.upsert(
-                        data={
-                            "create": {
-                                **edge,
-                                "production": {"connect": {"id": production_id}},
-                                "person": {"connect": {"id": person_id}},
-                            },
-                            "update": {
-                                **edge,
-                                "production": {"connect": {"id": production_id}},
-                                "person": {"connect": {"id": person_id}},
-                            },
-                        },
-                        where={
-                            "productionId_personId_role": {
-                                "productionId": production_id,
-                                "personId": person_id,
-                                "role": edge.get("role", "n"),
-                            }
-                        },
-                    )
-
-            logging.info(f"")
             # Add the scraped page to the cache
-            cache["scraped_pages"][production_url] = len(people_edge_pairs)
+            cache["scraped_pages"][production_url] = num_people_edge_pairs
 
     # Make sure we always close the connection
     finally:
@@ -149,29 +155,12 @@ def handler(event, context: context_.Context):
 
 if __name__ == "__main__":
     # Retrieve all of the production URLs from College Arts Shows & Screenings.
-    handler(None, None)
-    # page_number = 0
-    # production_urls = []
-    # while True:
-    #     productions_page = download_productions_list_page(page_number)
-    #     production_urls_on_page = parse_production_urls(productions_page)
-    #     if len(production_urls_on_page) == 0:
-    #         logger.info(f"Found 0 productions on page {page_number}; terminating loop.")
-    #         break
-    #     production_urls += production_urls_on_page
-    #     logger.info(
-    #         f"Scraped page {page_number} and located {len(production_urls_on_page)} productions (total {len(production_urls)})."
-    #     )
-    #     page_number += 1
-    #     if page_number > MAX_PRODUCTION_PAGES:
-    #         break
-
-    # for production_url in production_urls:
-    #     production_page = download_production_page(production_url)
-    #     production = parse_production(production_url, production_page)
-    #     people_edge_pairs = parse_people_and_edges(production_page)
-    #     if len(people_edge_pairs) == 0:
-    #         continue
-    #     print(production)
-    #     print(people_edge_pairs)
-    #     input()
+    # handler(None, None)
+    db = Prisma()
+    db.connect()
+    try:
+        handle_production_page(
+            db, "/events/shows-screenings/education-dramat-fall-ex-2023"
+        )
+    finally:
+        db.disconnect()

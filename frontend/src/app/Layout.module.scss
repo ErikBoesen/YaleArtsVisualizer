@@ -32,20 +32,23 @@
   & > main {
     grid-area: main;
     padding: calc(0.5 * var(--page-padding)) var(--page-padding);
-    min-height: calc(100vh - var(--header-height) - 10px);
-    min-height: calc(100svh - var(--header-height) - 10px);
+
+    @include media("md") {
+      min-height: calc(100vh - var(--header-height) - 10px);
+      min-height: calc(100svh - var(--header-height) - 10px);
+    }
   }
 
   & > footer {
     grid-area: footer;
   }
 
-  @include media("md") {
-    grid-template:
-      "header header" auto
-      "main graph" auto
-      "footer graph" auto / auto 1fr;
-  }
+  // @include media("md") {
+  //   grid-template:
+  //     "header header" auto
+  //     "main graph" auto
+  //     "footer graph" auto / auto 1fr;
+  // }
 
   @include media("lg") {
     grid-template:

@@ -4,9 +4,9 @@
  * Created on: Sat Oct 28 2023
  * 2023 Yale SWE
  */
-import Link from "next/link";
 import { prisma } from "@/util/prisma";
 import GraphData from "@/components/Graph/GraphData";
+import NodeLink from "@/components/NodeLink";
 
 // revalidate every hour
 export const revalidate = 3600;
@@ -20,9 +20,9 @@ export default async function ProductionsPage() {
       <ul>
         {productions.map((production) => (
           <li key={production.id}>
-            <Link href={`/productions/${production.id}`}>
+            <NodeLink nodeType="production" nodeId={production.id}>
               {production.name}
-            </Link>
+            </NodeLink>
           </li>
         ))}
       </ul>
