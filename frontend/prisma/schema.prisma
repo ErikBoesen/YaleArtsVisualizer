@@ -9,7 +9,7 @@
 datasource db {
   provider = "mysql"
   url = env("DATABASE_URL")
-  // directUrl = env("DATABASE_URL_DIRECT")
+  directUrl = env("DATABASE_URL_DIRECT")
   relationMode = "prisma"
 }
 
