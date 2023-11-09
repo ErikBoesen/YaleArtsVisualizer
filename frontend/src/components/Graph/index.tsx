@@ -147,8 +147,6 @@ export default function Graph() {
   ) {
     const NODE_RADIUS = 5;
     const BORDER_WIDTH = 2;
-    const highlightColor = HIGHLIGHT_NODE_COLOR;
-    const connectedColor = HIGHLIGHT_ADJACENT_NODE_COLOR;
 
     // Draw the node
     const nodeRadius = NODE_RADIUS * node.val;
@@ -169,11 +167,56 @@ export default function Graph() {
       ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
       ctx.strokeStyle =
         node.id === hoveredNodeId || node.id === anchoredNodeId
-          ? highlightColor
-          : connectedColor;
+          ? HIGHLIGHT_NODE_COLOR
+          : HIGHLIGHT_ADJACENT_NODE_COLOR;
       ctx.lineWidth = BORDER_WIDTH;
       ctx.stroke();
     }
+  }
+
+  function renderAnchoredNode(
+    node: any,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number
+  ) {
+    const ANCHORED_NODE_RADIUS = 10;
+    const ANCHORED_BORDER_WIDTH = 5;
+
+    // Draw the node
+    const nodeRadius = ANCHORED_NODE_RADIUS * node.val;
+    const nodeColor = node._type === "person" ? BASE_NODE_COLOR : NODE_2_COLOR;
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
+    ctx.fill();
+
+    // Draw border if necessary
+    if (
+      node.id === hoveredNodeId ||
+      node.id === anchoredNodeId ||
+      connections.current.nodes.has(node.id) ||
+      anchorConnects.current.nodes.has(node.id)
+    ) {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.strokeStyle =
+        node.id === hoveredNodeId || node.id === anchoredNodeId
+          ? HIGHLIGHT_NODE_COLOR
+          : HIGHLIGHT_ADJACENT_NODE_COLOR;
+      ctx.lineWidth = ANCHORED_BORDER_WIDTH;
+      ctx.stroke();
+    }
+
+    // Keep label of anchoredNode always shown
+    ctx.font = "bold 12px Arial";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "center"; // Center the text above the node
+    ctx.textBaseline = "middle"; // Align the text in the middle vertically
+    ctx.fillText(
+      node.name,
+      node.x,
+      node.y - ANCHORED_BORDER_WIDTH - ANCHORED_NODE_RADIUS * 2.5
+    );
   }
 
   function renderLink(
@@ -210,13 +253,17 @@ export default function Graph() {
         nodeColor="color"
         linkColor="color"
         ref={graphRef}
+        // TODO: conditional to never show the default label for the anchored node. kinda jank tho
+        nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
         {...dimensions}
         onNodeHover={(node) => {
           document.body.style.cursor = node ? "pointer" : "";
           setHoveredNodeId(node?.id);
         }}
         nodeCanvasObject={(node, ctx, globalScale) =>
-          renderNode(node, ctx, globalScale)
+          node?.id === anchoredNodeId
+            ? renderAnchoredNode(node, ctx, globalScale)
+            : renderNode(node, ctx, globalScale)
         }
         linkCanvasObject={(link, ctx, globalScale) =>
           renderLink(link, ctx, globalScale)
