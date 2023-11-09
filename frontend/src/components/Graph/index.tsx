@@ -255,6 +255,21 @@ export default function Graph() {
         ref={graphRef}
         // TODO: conditional to never show the default label for the anchored node. kinda jank tho
         nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
+        // TODO: this is a hacky way to make the anchored node always show up on top because different
+        // values are already parsed depending on type. we should simplify this process to handle types ONLY in util.ts
+        // the only thing going on this function should be the anchored node.
+        nodeVal={(node) => {
+          console.log(node);
+          if (node.id === anchoredNodeId) {
+            return 30;
+          } else if (node._type === "person") {
+            return 1.57;
+          } else if (node._type === "production") {
+            return 6.2;
+          } else {
+            return 0;
+          }
+        }}
         {...dimensions}
         onNodeHover={(node) => {
           document.body.style.cursor = node ? "pointer" : "";
