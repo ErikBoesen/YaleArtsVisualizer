@@ -14,6 +14,8 @@ import { useAtom, useAtomValue } from "jotai";
 import { anchoredNodeAtom, dataSourceAtom, hoveredNodeAtom } from "@/app/state";
 import { useGraphQuery } from "@/util/query";
 import { useRouter } from "next/navigation";
+// import NodeLabel
+import NodeLabel from "@/components/NodeLabel";
 
 interface Dimensions {
   width?: number;
@@ -116,6 +118,10 @@ export default function Graph() {
 
   // State to keep track of hovered node
   const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeAtom);
+  const [hoveredNodePosition, setHoveredNodePosition] = useState({
+    x: 0,
+    y: 0,
+  });
   const connections = useRef({ nodes: new Set(), links: new Set() });
   // update connections ref every time graphdata or hovered node changes
   useEffect(() => {
@@ -254,12 +260,12 @@ export default function Graph() {
         linkColor="color"
         ref={graphRef}
         // TODO: conditional to never show the default label for the anchored node. kinda jank tho
-        nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
+        // nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
+        nodeLabel={(node) => ""} //this is commented out so that we can use the custom NodeLabel for styling
         // TODO: this is a hacky way to make the anchored node always show up on top because different
         // values are already parsed depending on type. we should simplify this process to handle types ONLY in util.ts
         // the only thing going on this function should be the anchored node.
         nodeVal={(node) => {
-          console.log(node);
           if (node.id === anchoredNodeId) {
             return 30;
           } else if (node._type === "person") {
@@ -274,6 +280,7 @@ export default function Graph() {
         onNodeHover={(node) => {
           document.body.style.cursor = node ? "pointer" : "";
           setHoveredNodeId(node?.id);
+          setHoveredNodePosition({ x: node?.x, y: node?.y });
         }}
         nodeCanvasObject={(node, ctx, globalScale) =>
           node?.id === anchoredNodeId
@@ -295,6 +302,13 @@ export default function Graph() {
         linkHoverPrecision={10}
         graphData={graphData || { nodes: [], links: [] }}
       />
+      {hoveredNodeId && (
+        <NodeLabel
+          name={hoveredNodeId}
+          position={hoveredNodePosition}
+          graphRef={graphRef}
+        />
+      )}
     </section>
   );
 }
