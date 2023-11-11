@@ -1,5 +1,7 @@
 "use client";
 
+// deprecated
+
 import { useRef } from "react";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { ComponentProps, PropsWithChildren } from "react";
@@ -41,6 +43,7 @@ const NodeLabel = ({ name, position, graphRef }: NodeLabelProps) => {
         color: "#FFFFFF",
       }}
     >
+      <p>death</p>
       {name}
     </div>
   );

@@ -14,8 +14,6 @@ import { useAtom, useAtomValue } from "jotai";
 import { anchoredNodeAtom, dataSourceAtom, hoveredNodeAtom } from "@/app/state";
 import { useGraphQuery } from "@/util/query";
 import { useRouter } from "next/navigation";
-// import NodeLabel
-import NodeLabel from "@/components/NodeLabel";
 
 interface Dimensions {
   width?: number;
@@ -116,6 +114,13 @@ export default function Graph() {
   const HIGHLIGHT_ADJACENT_NODE_COLOR = "#DB5252";
   const HIGHLIGHT_LINK_COLOR = "#8c1515";
 
+  const DEFAULT_LINE_WIDTH = 1;
+  const HIGHLIGHT_LINE_WIDTH = 2;
+  const NODE_RADIUS = 5;
+  const BORDER_WIDTH = 2;
+  const ANCHORED_NODE_RADIUS = 10;
+  const ANCHORED_BORDER_WIDTH = 5;
+
   // State to keep track of hovered node
   const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeAtom);
   const [hoveredNodePosition, setHoveredNodePosition] = useState({
@@ -151,9 +156,6 @@ export default function Graph() {
     ctx: CanvasRenderingContext2D,
     globalScale: number
   ) {
-    const NODE_RADIUS = 5;
-    const BORDER_WIDTH = 2;
-
     // Draw the node
     const nodeRadius = NODE_RADIUS * node.val;
     const nodeColor = node._type === "person" ? BASE_NODE_COLOR : NODE_2_COLOR;
@@ -185,9 +187,6 @@ export default function Graph() {
     ctx: CanvasRenderingContext2D,
     globalScale: number
   ) {
-    const ANCHORED_NODE_RADIUS = 10;
-    const ANCHORED_BORDER_WIDTH = 5;
-
     // Draw the node
     const nodeRadius = ANCHORED_NODE_RADIUS * node.val;
     const nodeColor = node._type === "person" ? BASE_NODE_COLOR : NODE_2_COLOR;
@@ -212,17 +211,6 @@ export default function Graph() {
       ctx.lineWidth = ANCHORED_BORDER_WIDTH;
       ctx.stroke();
     }
-
-    // Keep label of anchoredNode always shown
-    ctx.font = "bold 12px Arial";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.textAlign = "center"; // Center the text above the node
-    ctx.textBaseline = "middle"; // Align the text in the middle vertically
-    ctx.fillText(
-      node.name,
-      node.x,
-      node.y - ANCHORED_BORDER_WIDTH - ANCHORED_NODE_RADIUS * 2.5
-    );
   }
 
   function renderLink(
@@ -230,10 +218,6 @@ export default function Graph() {
     ctx: CanvasRenderingContext2D,
     globalScale: number
   ) {
-    const DEFAULT_LINE_WIDTH = 1;
-    const HIGHLIGHT_LINE_WIDTH = 2;
-    const highlightColor = HIGHLIGHT_LINK_COLOR;
-
     ctx.beginPath();
     ctx.moveTo(link.source.x, link.source.y);
     ctx.lineTo(link.target.x, link.target.y);
@@ -241,11 +225,27 @@ export default function Graph() {
       connections.current.links.has(link.id) ||
       anchorConnects.current.links.has(link.id);
     ctx.strokeStyle = isConnected
-      ? highlightColor
+      ? HIGHLIGHT_LINK_COLOR
       : link.color || BASE_LINK_COLOR;
     ctx.lineWidth = isConnected ? HIGHLIGHT_LINE_WIDTH : DEFAULT_LINE_WIDTH;
 
     ctx.stroke();
+  }
+
+  function renderAnchoredNodeLabelOnly(
+    node: any,
+    ctx: CanvasRenderingContext2D,
+    globalScale: number
+  ) {
+    ctx.font = "bold 12px Arial";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      node.name,
+      node.x,
+      node.y + ANCHORED_BORDER_WIDTH + ANCHORED_NODE_RADIUS * 2.5
+    );
   }
 
   return (
@@ -259,10 +259,7 @@ export default function Graph() {
         nodeColor="color"
         linkColor="color"
         ref={graphRef}
-        // TODO: conditional to never show the default label for the anchored node. kinda jank tho
-        // nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
-        nodeLabel={(node) => ""} //this is commented out so that we can use the custom NodeLabel for styling
-        // TODO: this is a hacky way to make the anchored node always show up on top because different
+        nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
         // values are already parsed depending on type. we should simplify this process to handle types ONLY in util.ts
         // the only thing going on this function should be the anchored node.
         nodeVal={(node) => {
@@ -282,11 +279,23 @@ export default function Graph() {
           setHoveredNodeId(node?.id);
           setHoveredNodePosition({ x: node?.x, y: node?.y });
         }}
-        nodeCanvasObject={(node, ctx, globalScale) =>
-          node?.id === anchoredNodeId
-            ? renderAnchoredNode(node, ctx, globalScale)
-            : renderNode(node, ctx, globalScale)
-        }
+        nodeCanvasObject={(node, ctx, globalScale) => {
+          if (node.id === anchoredNodeId) {
+            renderAnchoredNode(node, ctx, globalScale);
+          } else {
+            renderNode(node, ctx, globalScale);
+          }
+
+          // Always render the anchored node label last
+          if (anchoredNodeId && graphData) {
+            const anchoredNode = graphData.nodes.find(
+              (n) => n.id === anchoredNodeId
+            );
+            if (anchoredNode) {
+              renderAnchoredNodeLabelOnly(anchoredNode, ctx, globalScale);
+            }
+          }
+        }}
         linkCanvasObject={(link, ctx, globalScale) =>
           renderLink(link, ctx, globalScale)
         }
@@ -302,13 +311,6 @@ export default function Graph() {
         linkHoverPrecision={10}
         graphData={graphData || { nodes: [], links: [] }}
       />
-      {hoveredNodeId && (
-        <NodeLabel
-          name={hoveredNodeId}
-          position={hoveredNodePosition}
-          graphRef={graphRef}
-        />
-      )}
     </section>
   );
 }
