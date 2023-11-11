@@ -14,6 +14,7 @@ import { useAtom, useAtomValue } from "jotai";
 import { anchoredNodeAtom, dataSourceAtom, hoveredNodeAtom } from "@/app/state";
 import { useGraphQuery } from "@/util/query";
 import { useRouter } from "next/navigation";
+import * as d3Force from "d3-force";
 
 interface Dimensions {
   width?: number;
@@ -101,6 +102,22 @@ export default function Graph() {
       });
     }
   }, [anchoredNodeId, graphData]);
+
+  // generally customize forces
+  // useEffect(() => {
+  //   if (!graphRef.current || !graphData) return;
+
+  // // Adjust repulsion between nodes
+  // graphRef.current.d3Force("charge", d3Force.forceManyBody());
+
+  // // Add collision force to prevent overlap
+  // graphRef.current.d3Force("collide", d3Force.forceCollide().radius(5));
+
+  // graphRef.current.d3Force("center", d3Force.forceCenter(0, 0));
+
+  // // restart the simulation for changes to take effect
+  //   graphRef.current.d3ReheatSimulation();
+  // }, [graphData]);
 
   /* -------------------------------------------------------------------------- */
   /*                          For highlighting nodes                         */
@@ -195,7 +212,7 @@ export default function Graph() {
     ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
     ctx.fill();
 
-    // Draw border if necessary
+    // Draw border
     if (
       node.id === hoveredNodeId ||
       node.id === anchoredNodeId ||
@@ -204,10 +221,8 @@ export default function Graph() {
     ) {
       ctx.beginPath();
       ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-      ctx.strokeStyle =
-        node.id === hoveredNodeId || node.id === anchoredNodeId
-          ? HIGHLIGHT_NODE_COLOR
-          : HIGHLIGHT_ADJACENT_NODE_COLOR;
+      // TODO: decide if we wanna use the highlight adjacent color or reg
+      ctx.strokeStyle = HIGHLIGHT_ADJACENT_NODE_COLOR;
       ctx.lineWidth = ANCHORED_BORDER_WIDTH;
       ctx.stroke();
     }
@@ -259,6 +274,7 @@ export default function Graph() {
         nodeColor="color"
         linkColor="color"
         ref={graphRef}
+        // TODO: wrap text depending on length
         nodeLabel={(node) => (node.id === anchoredNodeId ? "" : node.name)}
         // values are already parsed depending on type. we should simplify this process to handle types ONLY in util.ts
         // the only thing going on this function should be the anchored node.
