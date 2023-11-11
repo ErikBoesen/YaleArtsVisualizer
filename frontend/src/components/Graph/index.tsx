@@ -242,9 +242,9 @@ export default function Graph() {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(
-      node.name,
+      node.name.toUpperCase(),
       node.x,
-      node.y + ANCHORED_BORDER_WIDTH + ANCHORED_NODE_RADIUS * 2.5
+      node.y + ANCHORED_BORDER_WIDTH + ANCHORED_NODE_RADIUS * 3
     );
   }
 
