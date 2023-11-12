@@ -13,6 +13,7 @@ import s from "../../SubPage.module.scss";
 import { Fragment } from "react";
 import Balancer from "react-wrap-balancer";
 import NodeLink from "@/components/NodeLink";
+import Image from "next/image";
 
 interface RouteParams {
   params: {
@@ -69,6 +70,7 @@ export default async function ProductionPage({
             nodeType="production"
             nodeId={production.id}
             style={{ opacity: 1 }}
+            onlyScroll
           >
             <Balancer>{production.name}</Balancer>
           </NodeLink>
@@ -78,7 +80,16 @@ export default async function ProductionPage({
           Visit on {href.hostname} {"->"}
         </a>
       </hgroup>
-      <pre>{production.description}</pre>
+      <pre>
+        {production.imageHref && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={production.imageHref}
+            alt={production.imageAlt || "A production poster."}
+          />
+        )}
+        {production.description}
+      </pre>
       <section>
         <h2>Cast</h2>
         <table>
@@ -108,7 +119,7 @@ export default async function ProductionPage({
         </table>
       </section>
       <GraphData
-        source={["productions", production.id, { depth: "3" }]}
+        source={["productions", production.id, { depth: "2" }]}
         anchoredNodeId={`prod_${production.id}`}
       />
     </article>
