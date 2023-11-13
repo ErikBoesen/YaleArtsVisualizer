@@ -9,7 +9,9 @@
 
 import { NodeQueryKey } from "@/util/query";
 import { atom } from "jotai";
+import { ExtendedNodeObject } from "./api/graph/utils";
 
 export const dataSourceAtom = atom<NodeQueryKey>(["static", "home"]);
-export const anchoredNodeAtom = atom<string | undefined>(undefined);
-export const hoveredNodeAtom = atom<string | undefined>(undefined);
+export const anchoredNodeIdAtom = atom<string | undefined>(undefined);
+export const anchoredNodeAtom = atom<ExtendedNodeObject | undefined>(undefined);
+export const hoveredNodeAtom = atom<ExtendedNodeObject | undefined>(undefined);

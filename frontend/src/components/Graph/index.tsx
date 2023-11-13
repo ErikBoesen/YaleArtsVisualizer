@@ -11,7 +11,12 @@ import s from "./Graph.module.scss";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { debounce } from "debounce";
 import { useAtom, useAtomValue } from "jotai";
-import { anchoredNodeAtom, dataSourceAtom, hoveredNodeAtom } from "@/app/state";
+import {
+  anchoredNodeAtom,
+  anchoredNodeIdAtom,
+  dataSourceAtom,
+  hoveredNodeAtom,
+} from "@/app/state";
 import { useGraphQuery } from "@/util/query";
 import { useRouter } from "next/navigation";
 // import NodeLabel
@@ -20,6 +25,7 @@ import GraphOverlay from "@/components/Graph/GraphOverlay";
 import useGraphDimensions from "@/components/Graph/hooks/useGraphDimensions";
 import useConnects from "@/components/Graph/hooks/useConnectedNodes";
 import useGraphInformation from "@/components/Graph/hooks/useGraphInformation";
+import { ExtendedNodeObject } from "@/app/api/graph/utils";
 
 /**
  * The Graph component consumes serialized queries from the GraphProvider, turns
@@ -43,10 +49,11 @@ export default function Graph() {
   const { dimensions } = useGraphDimensions(containerRef, graphRef, graphData);
 
   // keep track of nodes connected to the anchored and hovered nodes
-  const [anchoredNodeId, setAnchoredNode] = useAtom(anchoredNodeAtom);
-  const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeAtom);
+  const [anchoredNodeId, setAnchoredNodeId] = useAtom(anchoredNodeIdAtom);
+  const [anchoredNode, setAnchoredNode] = useAtom(anchoredNodeAtom); //TODO: collapse the id and node atoms into one if possible? not sure how to guarantee we have all the node info from the static pages though
+  const [hoveredNode, setHoveredNode] = useAtom(hoveredNodeAtom);
   const anchorConnects = useConnects(anchoredNodeId, graphRef, graphData, true);
-  const hoverConnects = useConnects(hoveredNodeId, graphRef, graphData);
+  const hoverConnects = useConnects(hoveredNode?.id, graphRef, graphData);
 
   /* -------------------------------------------------------------------------- */
   /*                          For highlighting nodes                         */
@@ -68,7 +75,7 @@ export default function Graph() {
   const ANCHORED_BORDER_WIDTH = 5;
 
   function renderNode(
-    node: any,
+    node: ExtendedNodeObject,
     ctx: CanvasRenderingContext2D,
     globalScale: number
   ) {
@@ -83,14 +90,14 @@ export default function Graph() {
     let borderWidth = 0.5;
     let borderColor = "#00356B20";
     if (
-      node.id === hoveredNodeId ||
+      node.id === hoveredNode?.id ||
       node.id === anchoredNodeId ||
       hoverConnects.current.nodes.has(node.id) ||
       anchorConnects.current.nodes.has(node.id)
     ) {
       borderWidth = BORDER_WIDTH;
       borderColor =
-        node.id === hoveredNodeId || node.id === anchoredNodeId
+        node.id === hoveredNode?.id || node.id === anchoredNodeId
           ? HIGHLIGHT_NODE_COLOR
           : HIGHLIGHT_ADJACENT_NODE_COLOR;
     }
@@ -104,7 +111,7 @@ export default function Graph() {
   }
 
   function renderAnchoredNode(
-    node: any,
+    node: ExtendedNodeObject,
     ctx: CanvasRenderingContext2D,
     globalScale: number
   ) {
@@ -118,7 +125,7 @@ export default function Graph() {
 
     // Draw border
     if (
-      node.id === hoveredNodeId ||
+      node.id === hoveredNode?.id ||
       node.id === anchoredNodeId ||
       hoverConnects.current.nodes.has(node.id) ||
       anchorConnects.current.nodes.has(node.id)
@@ -152,7 +159,7 @@ export default function Graph() {
   }
 
   function renderAnchoredNodeLabelOnly(
-    node: any,
+    node: ExtendedNodeObject,
     ctx: CanvasRenderingContext2D,
     globalScale: number
   ) {
@@ -162,8 +169,8 @@ export default function Graph() {
     ctx.textBaseline = "middle";
     ctx.fillText(
       node.name.toUpperCase(),
-      node.x,
-      node.y + ANCHORED_BORDER_WIDTH + ANCHORED_NODE_RADIUS * 3
+      node.x!,
+      node.y! + ANCHORED_BORDER_WIDTH + ANCHORED_NODE_RADIUS * 3
     );
   }
 
@@ -198,8 +205,7 @@ export default function Graph() {
         maxZoom={8}
         onNodeHover={(node) => {
           document.body.style.cursor = node ? "pointer" : "";
-          setHoveredNodeId(node?.id);
-          // setHoveredNodePosition({ x: node?.x, y: node?.y });
+          setHoveredNode(node);
         }}
         nodeCanvasObject={(node, ctx, globalScale) => {
           if (node.id === anchoredNodeId) {
@@ -214,7 +220,12 @@ export default function Graph() {
               (n) => n.id === anchoredNodeId
             );
             if (anchoredNode) {
-              renderAnchoredNodeLabelOnly(anchoredNode, ctx, globalScale);
+              setAnchoredNode(anchoredNode as ExtendedNodeObject);
+              renderAnchoredNodeLabelOnly(
+                anchoredNode as ExtendedNodeObject,
+                ctx,
+                globalScale
+              );
             }
           }
         }}
@@ -222,7 +233,8 @@ export default function Graph() {
           renderLink(link, ctx, globalScale)
         }
         onNodeClick={(node) => {
-          setAnchoredNode(node.id);
+          setAnchoredNodeId(node.id);
+          setAnchoredNode(node);
           const nodePath =
             node._type === "production" ? "productions" : "people";
           const nodeId = (node.id as string)
@@ -234,9 +246,11 @@ export default function Graph() {
         graphData={graphData || { nodes: [], links: [] }}
       />
       <GraphOverlay containerRef={containerRef} graphRef={graphRef}>
-        <h1>Showing THE NODE NAME</h1>
+        <h1>{anchoredNode && `Showing ${anchoredNode.name.toUpperCase()}`}</h1>
         <div>
           {counts &&
+            counts.production &&
+            counts.person &&
             `${counts.production} productions, ${counts.person} people`}
         </div>
       </GraphOverlay>
