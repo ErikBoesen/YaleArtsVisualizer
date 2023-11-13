@@ -160,6 +160,13 @@ export default function Graph() {
         ctx.lineWidth = BORDER_WIDTH;
         ctx.stroke();
       }
+
+      // Draw border
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = borderWidth;
+      ctx.stroke();
     }
     if (node._type === "crew") {
       const labelFontSize = 2.5;
@@ -335,7 +342,11 @@ export default function Graph() {
         graphData={graphData || { nodes: [], links: [] }}
       />
       <GraphOverlay containerRef={containerRef} graphRef={graphRef}>
-        <h1>{anchoredNode && `Showing ${anchoredNode.name.toUpperCase()}`}</h1>
+        <h1>
+          {anchoredNodeId &&
+            anchoredNode &&
+            `Showing ${anchoredNode.name.toUpperCase()}`}
+        </h1>
         <div>
           {counts &&
             counts.production &&
