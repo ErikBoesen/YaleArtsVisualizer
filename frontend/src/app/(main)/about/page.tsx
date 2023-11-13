@@ -12,7 +12,7 @@ export default function AboutPage() {
   return (
     <article className={s.aboutPageContainer}>
       <h1>About Yale Arts Map</h1>
-      {/* <GraphData source="/ydn_graph.json" /> */}
+      {<GraphData source={["static", "about"]} />}
 
       <section className={s.descriptionContainer}>
         <section className={s.aboutArtsMap}>

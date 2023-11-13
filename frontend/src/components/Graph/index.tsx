@@ -102,6 +102,16 @@ export default function Graph() {
     }
   }, [anchoredNodeId, graphData]);
 
+  // Custom node appearance with the project's logo
+  const logoImage = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const img = new Image();
+    img.src = "/YAMLogo.png";
+    img.onload = () => {
+      logoImage.current = img;
+    };
+  }, []);
+
   /* -------------------------------------------------------------------------- */
   /*                          For highlighting nodes                         */
   /* -------------------------------------------------------------------------- */
@@ -154,25 +164,80 @@ export default function Graph() {
     const nodeRadius = NODE_RADIUS * node.val;
     const nodeColor = node._type === "person" ? BASE_NODE_COLOR : NODE_2_COLOR;
     ctx.beginPath();
-    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
-    ctx.fill();
+
+    if (node._type === "logo" && logoImage.current) {
+      const width = logoImage.current.naturalWidth / 25;
+      const height = logoImage.current.naturalHeight / 25;
+      ctx.drawImage(
+        logoImage.current,
+        node.x - width / 2,
+        node.y - height / 2,
+        width,
+        height
+      );
+    } else if (node._type === "banner") {
+      ctx.ellipse(
+        node.x,
+        node.y,
+        nodeRadius * 1.7,
+        nodeRadius,
+        0,
+        0,
+        2 * Math.PI
+      );
+      ctx.fillStyle = "#00356b";
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 0.3;
+      ctx.stroke();
+      ctx.font = "bold 11px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "white";
+      ctx.fillText(node.name, node.x, node.y);
+    } else if (node._type === "hollow") {
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "#00356b";
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    } else {
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
+      ctx.fill();
+    }
 
     // Draw border if necessary
     if (
-      node.id === hoveredNodeId ||
-      node.id === anchoredNodeId ||
-      connections.current.nodes.has(node.id) ||
-      anchorConnects.current.nodes.has(node.id)
+      node._type !== "logo" &&
+      node._type !== "crew" &&
+      node._type !== "banner" &&
+      node._type !== "hollow"
     ) {
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-      ctx.strokeStyle =
-        node.id === hoveredNodeId || node.id === anchoredNodeId
-          ? highlightColor
-          : connectedColor;
-      ctx.lineWidth = BORDER_WIDTH;
-      ctx.stroke();
+      if (
+        node.id === hoveredNodeId ||
+        node.id === anchoredNodeId ||
+        connections.current.nodes.has(node.id) ||
+        anchorConnects.current.nodes.has(node.id)
+      ) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+        ctx.strokeStyle =
+          node.id === hoveredNodeId || node.id === anchoredNodeId
+            ? highlightColor
+            : connectedColor;
+        ctx.lineWidth = BORDER_WIDTH;
+        ctx.stroke();
+      }
+    }
+    if (node._type === "crew") {
+      const labelFontSize = 2.5;
+      ctx.font = `${labelFontSize}px Arial`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "white";
+      ctx.fillText(node.name, node.x, node.y - nodeRadius - labelFontSize / 2);
     }
   }
 
@@ -196,6 +261,22 @@ export default function Graph() {
       : link.color || BASE_LINK_COLOR;
     ctx.lineWidth = isConnected ? HIGHLIGHT_LINE_WIDTH : DEFAULT_LINE_WIDTH;
 
+    if (link.source._type === "logo" || link.source._type === "crew") {
+      ctx.strokeStyle = BASE_LINK_COLOR;
+      ctx.lineWidth = DEFAULT_LINE_WIDTH;
+    } else if (
+      link.source._type === "banner" &&
+      link.target._type === "banner"
+    ) {
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 0.75;
+    } else if (
+      link.source._type === "hollow" ||
+      link.target._type === "hollow"
+    ) {
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 0.25;
+    }
     ctx.stroke();
   }
 
@@ -222,13 +303,20 @@ export default function Graph() {
           renderLink(link, ctx, globalScale)
         }
         onNodeClick={(node) => {
-          setAnchoredNode(node.id);
-          const nodePath =
-            node._type === "production" ? "productions" : "people";
-          const nodeId = (node.id as string)
-            .replace("prod_", "")
-            .replace("pers_", "");
-          router.push(`/${nodePath}/${nodeId}`);
+          if (
+            node._type !== "logo" &&
+            node._type !== "crew" &&
+            node._type !== "banner" &&
+            node._type !== "hollow"
+          ) {
+            setAnchoredNode(node.id);
+            const nodePath =
+              node._type === "production" ? "productions" : "people";
+            const nodeId = (node.id as string)
+              .replace("prod_", "")
+              .replace("pers_", "");
+            router.push(`/${nodePath}/${nodeId}`);
+          }
         }}
         linkHoverPrecision={10}
         graphData={graphData || { nodes: [], links: [] }}
