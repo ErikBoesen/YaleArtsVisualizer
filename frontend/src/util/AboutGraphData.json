@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    { "id": "0", "_type": "logo", "name": "YAM", "val": 2 },
+
+    { "id": "1", "_type": "crew", "name": "Evan Kirkiles", "val": 1 },
+
+    { "id": "2", "_type": "crew", "name": "Erik Boesen", "val": 1 },
+
+    {
+      "id": "3",
+      "_type": "crew",
+      "name": "Fernando Cuello-Garcia",
+      "val": 1
+    },
+
+    { "id": "4", "_type": "crew", "name": "Sarah Teng", "val": 1 },
+
+    { "id": "5", "_type": "crew", "name": "Dom Hansen", "val": 1 },
+
+    { "id": "6", "_type": "crew", "name": "Misho Gabashvili", "val": 1 }
+  ],
+  "links": [
+    { "source": "0", "target": "1" },
+    { "source": "0", "target": "2" },
+    { "source": "0", "target": "3" },
+    { "source": "0", "target": "4" },
+    { "source": "0", "target": "5" },
+    { "source": "0", "target": "6" }
+  ]
+}

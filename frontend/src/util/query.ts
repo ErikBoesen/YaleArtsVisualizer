@@ -7,6 +7,8 @@
 
 import { NodeEndpoint } from "@/app/api/graph/utils";
 import { GraphData } from "react-force-graph-2d";
+import AboutGraphData from "./AboutGraphData.json";
+import HomeGraphData from "./HomeGraphData.json";
 import { QueryClient, useQuery } from "react-query";
 
 type NodeFetchId = number;
@@ -18,7 +20,7 @@ export type NodeQueryKey =
   | [NodeEndpoint]
   | [NodeEndpoint, NodeFetchId]
   | [NodeEndpoint, NodeFetchId | undefined, NodeFetchOptions]
-  | ["static", string];
+  | ["static", "about" | "home"];
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,8 +38,14 @@ export function useGraphQuery(...args: NodeQueryKey) {
     queryFn: async ({ queryKey }) => {
       const [nodeType, nodeId, nodeOptions] = queryKey;
       if (nodeType === "static") {
-        /// Do something here
-        return { nodes: [], links: [] };
+        switch (nodeId) {
+          case "about":
+            return AboutGraphData;
+          case "home":
+            return HomeGraphData;
+          default:
+            throw new Error("Unknown static graph type");
+        }
       }
       let fetchUrl = `/api/graph/${nodeType}`;
       if (nodeId) fetchUrl += `/${nodeId}`;
