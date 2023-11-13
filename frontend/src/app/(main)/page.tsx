@@ -11,7 +11,6 @@ import GraphData from "@/components/Graph/GraphData";
 export default function Page() {
   return (
     <article className={s.container}>
-      {<GraphData source={["static", "home"]} />}
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
         tempor incididunt ut labore et dolore magna aliqua. Cursus euismod quis

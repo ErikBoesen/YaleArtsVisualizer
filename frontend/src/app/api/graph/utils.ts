@@ -77,6 +77,16 @@ export function generateSelectStatement(
   return selector;
 }
 
+export interface ExtendedNodeObject extends NodeObject {
+  name: string;
+  _type: string;
+  id: string;
+  val: number;
+  x: number;
+  y: number;
+  [others: string]: any;
+}
+
 /**
  * Parses
  */
@@ -85,7 +95,7 @@ export function parseNodesAndLinks<T extends { _type: string }>(
   // | (Person & { _type: "person"; productions: ProductionPersonEdge[] })
   // | (Production & { _type: "production"; people: ProductionPersonEdge[] })
 ) {
-  const nodes: { [key: string]: NodeObject } = {};
+  const nodes: { [key: string]: ExtendedNodeObject } = {};
   const links: LinkObject[] = [];
   let toParse: any[] = [rootNode];
   while (toParse.length > 0) {
@@ -96,13 +106,16 @@ export function parseNodesAndLinks<T extends { _type: string }>(
         toParse.push(...(parsable.productions || []));
         delete parsable["productions"];
         parsable.id = `pers_${parsable.id}`;
+        // this logic works in conjunction with some math in the graph component
         parsable.val = 1; // this is the size of the node
         nodes[parsable.id] = parsable;
+        console.log(parsable);
         break;
       case "production":
         toParse.push(...((parsable.persons || []) as unknown as T[]));
         delete parsable["persons"];
         parsable.id = `prod_${parsable.id}`;
+        // TODO: this logic works in conjunction with some math in the graph component. at some point it should be changed to only happen on one end
         parsable.val = 2; // this is the size of the node
         nodes[parsable.id] = parsable;
         break;

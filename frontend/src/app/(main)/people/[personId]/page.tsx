@@ -52,7 +52,12 @@ export default async function PersonPage({
     <article className={s.container}>
       <hgroup>
         <h1>
-          <NodeLink nodeType="person" nodeId={person.id} style={{ opacity: 1 }}>
+          <NodeLink
+            nodeType="person"
+            nodeId={person.id}
+            style={{ opacity: 1 }}
+            onlyScroll
+          >
             <Balancer>{person.name}</Balancer>
           </NodeLink>
         </h1>

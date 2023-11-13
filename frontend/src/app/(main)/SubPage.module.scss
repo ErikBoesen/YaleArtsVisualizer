@@ -32,6 +32,10 @@
     font-size: 2em;
     line-height: 1;
 
+    & a {
+      scroll-padding-top: var(--header-height);
+    }
+
     // & span::after {
     //   content: "";
     //   border: 7px solid #db5252;
@@ -70,6 +74,15 @@
     grid-area: description;
     white-space: pre-wrap;
     width: 100%;
+
+    & img {
+      border: 1px solid theme-color("content");
+      float: right;
+      width: 30%;
+      margin-left: 1em;
+      margin-bottom: 1em;
+      background-color: rgba(255, 255, 255, 0.3);
+    }
   }
 
   & section {
