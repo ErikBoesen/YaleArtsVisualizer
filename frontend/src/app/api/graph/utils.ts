@@ -109,7 +109,6 @@ export function parseNodesAndLinks<T extends { _type: string }>(
         // this logic works in conjunction with some math in the graph component
         parsable.val = 1; // this is the size of the node
         nodes[parsable.id] = parsable;
-        console.log(parsable);
         break;
       case "production":
         toParse.push(...((parsable.persons || []) as unknown as T[]));
