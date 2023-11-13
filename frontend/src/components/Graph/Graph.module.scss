@@ -37,12 +37,69 @@
     }
   }
 
-  & > div {
-    display: contents;
-  }
+  // & > div {
+  //   display: contents;
+  // }
 
   // & #force-graph-container {
   //   width: 100%;
   //   height: 100%;
   // }
+}
+
+.overlay {
+  grid-area: graph;
+  position: absolute;
+  inset: 0;
+  padding: 0.5em var(--page-padding);
+  pointer-events: none;
+  display: grid;
+  grid-template:
+    "title search" 1fr
+    "actions settings" 1fr / 1fr auto;
+
+  & > * {
+    pointer-events: all;
+  }
+
+  @include media("lg") {
+    padding: var(--page-padding);
+  }
+}
+
+.info {
+  grid-area: title;
+  align-self: flex-start;
+  // background-color: rgba(0, 0, 0, 0.4);
+  // backdrop-filter: blur(4px);
+}
+
+.controls {
+  grid-area: actions;
+  display: flex;
+  align-self: flex-end;
+  align-items: center;
+  gap: 0.5em;
+  padding-bottom: 0.5em;
+
+  & button {
+    aspect-ratio: 1;
+    border-radius: 100%;
+    border: 1px solid theme-color("content");
+    background-color: theme-color("background");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2em;
+    transition: all 0.1s ease-in-out;
+
+    & svg {
+      font-size: 1.25em;
+    }
+
+    &:hover {
+      background-color: theme-color("content");
+      color: theme-color("background");
+    }
+  }
 }
