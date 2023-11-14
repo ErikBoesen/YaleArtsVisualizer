@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import s from "./Graph.module.scss";
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { debounce } from "debounce";
@@ -55,6 +55,16 @@ export default function Graph() {
   const anchorConnects = useConnects(anchoredNodeId, graphRef, graphData, true);
   const hoverConnects = useConnects(hoveredNode?.id, graphRef, graphData);
 
+  // Custom node appearance with the project's logo
+  const logoImage = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const img = new Image();
+    img.src = "/YAMLogo.png";
+    img.onload = () => {
+      logoImage.current = img;
+    };
+  }, []);
+
   /* -------------------------------------------------------------------------- */
   /*                          For highlighting nodes                         */
   /* -------------------------------------------------------------------------- */
@@ -83,31 +93,89 @@ export default function Graph() {
     const nodeRadius = NODE_RADIUS * node.val;
     const nodeColor = node._type === "person" ? BASE_NODE_COLOR : NODE_2_COLOR;
     ctx.beginPath();
-    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-    ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
-    ctx.fill();
+
+    if (node._type === "logo" && logoImage.current) {
+      const width = logoImage.current.naturalWidth / 25;
+      const height = logoImage.current.naturalHeight / 25;
+      ctx.drawImage(
+        logoImage.current,
+        node.x - width / 2,
+        node.y - height / 2,
+        width,
+        height
+      );
+    } else if (node._type === "banner") {
+      ctx.ellipse(
+        node.x,
+        node.y,
+        nodeRadius * 1.7,
+        nodeRadius,
+        0,
+        0,
+        2 * Math.PI
+      );
+      ctx.fillStyle = "#00356b";
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 0.3;
+      ctx.stroke();
+      ctx.font = "bold 11px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "white";
+      ctx.fillText(node.name, node.x, node.y);
+    } else if (node._type === "hollow") {
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = "#00356b";
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    } else {
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = nodeColor || BASE_NODE_COLOR;
+      ctx.fill();
+    }
 
     let borderWidth = 0.5;
     let borderColor = "#00356B20";
     if (
-      node.id === hoveredNode?.id ||
-      node.id === anchoredNodeId ||
-      hoverConnects.current.nodes.has(node.id) ||
-      anchorConnects.current.nodes.has(node.id)
+      node._type !== "logo" &&
+      node._type !== "crew" &&
+      node._type !== "banner" &&
+      node._type !== "hollow"
     ) {
-      borderWidth = BORDER_WIDTH;
-      borderColor =
-        node.id === hoveredNode?.id || node.id === anchoredNodeId
-          ? HIGHLIGHT_NODE_COLOR
-          : HIGHLIGHT_ADJACENT_NODE_COLOR;
-    }
+      if (
+        node.id === hoveredNode?.id ||
+        node.id === anchoredNodeId ||
+        hoverConnects.current.nodes.has(node.id) ||
+        anchorConnects.current.nodes.has(node.id)
+      ) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+        ctx.strokeStyle =
+          node.id === hoveredNode?.id || node.id === anchoredNodeId
+            ? HIGHLIGHT_NODE_COLOR
+            : HIGHLIGHT_ADJACENT_NODE_COLOR;
+        ctx.lineWidth = BORDER_WIDTH;
+        ctx.stroke();
+      }
 
-    // Draw border
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-    ctx.strokeStyle = borderColor;
-    ctx.lineWidth = borderWidth;
-    ctx.stroke();
+      // Draw border
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = borderWidth;
+      ctx.stroke();
+    }
+    if (node._type === "crew") {
+      const labelFontSize = 2.5;
+      ctx.font = `${labelFontSize}px Arial`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "white";
+      ctx.fillText(node.name, node.x, node.y - nodeRadius - labelFontSize / 2);
+    }
   }
 
   function renderAnchoredNode(
@@ -132,7 +200,6 @@ export default function Graph() {
     ) {
       ctx.beginPath();
       ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI, false);
-      // TODO: decide if we wanna use the highlight adjacent color or reg
       ctx.strokeStyle = HIGHLIGHT_ADJACENT_NODE_COLOR;
       ctx.lineWidth = ANCHORED_BORDER_WIDTH;
       ctx.stroke();
@@ -155,6 +222,22 @@ export default function Graph() {
       : link.color || BASE_LINK_COLOR;
     ctx.lineWidth = isConnected ? HIGHLIGHT_LINE_WIDTH : DEFAULT_LINE_WIDTH;
 
+    if (link.source._type === "logo" || link.source._type === "crew") {
+      ctx.strokeStyle = BASE_LINK_COLOR;
+      ctx.lineWidth = DEFAULT_LINE_WIDTH;
+    } else if (
+      link.source._type === "banner" &&
+      link.target._type === "banner"
+    ) {
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 0.75;
+    } else if (
+      link.source._type === "hollow" ||
+      link.target._type === "hollow"
+    ) {
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 0.25;
+    }
     ctx.stroke();
   }
 
@@ -241,12 +324,29 @@ export default function Graph() {
             .replace("prod_", "")
             .replace("pers_", "");
           router.push(`/${nodePath}/${nodeId}`);
+          if (
+            node._type !== "logo" &&
+            node._type !== "crew" &&
+            node._type !== "banner" &&
+            node._type !== "hollow"
+          ) {
+            const nodePath =
+              node._type === "production" ? "productions" : "people";
+            const nodeId = (node.id as string)
+              .replace("prod_", "")
+              .replace("pers_", "");
+            router.push(`/${nodePath}/${nodeId}`);
+          }
         }}
         linkHoverPrecision={10}
         graphData={graphData || { nodes: [], links: [] }}
       />
       <GraphOverlay containerRef={containerRef} graphRef={graphRef}>
-        <h1>{anchoredNode && `Showing ${anchoredNode.name.toUpperCase()}`}</h1>
+        <h1>
+          {anchoredNodeId &&
+            anchoredNode &&
+            `Showing ${anchoredNode.name.toUpperCase()}`}
+        </h1>
         <div>
           {counts &&
             counts.production &&

@@ -1,0 +1,25 @@
+{
+  "nodes": [
+    { "id": "0", "_type": "banner", "name": "Map", "val": 2 },
+    { "id": "1", "_type": "banner", "name": "Arts", "val": 2 },
+    { "id": "2", "_type": "banner", "name": "Yale", "val": 2 },
+    { "id": "3", "_type": "hollow", "name": "", "val": 1.5 },
+    { "id": "4", "_type": "hollow", "name": "", "val": 1.5 },
+    { "id": "5", "_type": "hollow", "name": "", "val": 1.5 }
+  ],
+  "links": [
+    { "source": "0", "target": "1" },
+    { "source": "1", "target": "2" },
+
+    { "source": "3", "target": "0" },
+    { "source": "3", "target": "1" },
+    { "source": "3", "target": "4" },
+
+    { "source": "4", "target": "0" },
+    { "source": "4", "target": "1" },
+
+    { "source": "5", "target": "0" },
+    { "source": "5", "target": "1" },
+    { "source": "5", "target": "2" }
+  ]
+}
