@@ -19,7 +19,6 @@ import {
 } from "@/app/state";
 import { useGraphQuery } from "@/util/query";
 import { useRouter } from "next/navigation";
-// import NodeLabel
 import NodeLabel from "@/components/NodeLabel";
 import GraphOverlay from "@/components/Graph/GraphOverlay";
 import useGraphDimensions from "@/components/Graph/hooks/useGraphDimensions";
@@ -250,11 +249,24 @@ export default function Graph() {
     ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
+
+    // Set up the drop shadow properties
+    ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 1.5;
+    ctx.shadowOffsetY = 1.5; 
+
     ctx.fillText(
       node.name.toUpperCase(),
       node.x!,
       node.y! + ANCHORED_BORDER_WIDTH + ANCHORED_NODE_RADIUS * 3
     );
+
+    // Reset shadow properties to avoid affecting other canvas elements
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
   }
 
   return (
